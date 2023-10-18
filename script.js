@@ -58,8 +58,8 @@ function calcAroundMine(){
 let canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 ctx.imageSmoothingEnabled = false;
-canvas.width = 178;
-canvas.height = 178;
+canvas.width = 180;
+canvas.height = 223;
 
 // canvas.fillStyle = "rgba("+r+","+g+","+b+","+(a/255)+")";
 // canvas.fillRect( 1, 1, 1, 1 );
@@ -69,34 +69,45 @@ const myImgElement = document.getElementById("myImag");
 // drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
 // empty box
 // Example: ctx.drawImage( myImgElement, 14, 195, 16, 16, 0, 0, 16, 16);
+
 ctx.imageSmoothingEnabled = false;
-ctx.drawImage( myImgElement, 478, 422, 9, 9, 0, 0, 9, 9);
+
+// upper left corner
+ctx.drawImage( myImgElement, 475, 376, 12, 55, 0, 0, 12, 55);
+// top border
 for(let i = 0; i < 10; i ++){
-	ctx.imageSmoothingEnabled = false;
-	ctx.drawImage( myImgElement, 487, 422, 16, 9, 9+i*16, 0, 16, 9);
+	ctx.drawImage( myImgElement, 535, 376, 16, 55, 12+i*16, 0, 16, 55);
 }
 
-// display border around grid
-ctx.imageSmoothingEnabled = false;
-ctx.drawImage( myImgElement, 743, 422, 8, 9, 169, 0, 8, 9);
+// upper right corner
+ctx.drawImage( myImgElement, 743, 376, 8, 55, 172, 0, 8, 55);
+// right border
 for(let i = 0; i < 10; i++){
-	ctx.imageSmoothingEnabled = false;
-	ctx.drawImage( myImgElement, 743, 431, 8, 16, 169, 9+i*16, 8, 16);
+	ctx.drawImage( myImgElement, 743, 431, 8, 16, 172, 55+i*16, 8, 16);
 }
 
-ctx.imageSmoothingEnabled = false;
-ctx.drawImage( myImgElement, 743, 687, 8, 8, 169, 169, 8, 8);
+// lower right corner
+ctx.drawImage( myImgElement, 743, 687, 8, 8, 172, 215, 8, 8);
+// bottom border
 for(let i = 0; i < 10; i++){
-	ctx.imageSmoothingEnabled = false;
-	ctx.drawImage( myImgElement, 727, 687, 16, 8, 153-i*16, 169, 16, 8);
+	ctx.drawImage( myImgElement, 727, 687, 16, 8, 156-i*16, 215, 16, 8);
 }
 
-ctx.imageSmoothingEnabled = false;
-ctx.drawImage( myImgElement, 478, 687, 9, 8, 0, 169, 9, 8);
+// lower left corner
+ctx.drawImage( myImgElement, 475, 687, 12, 8, 0, 215, 12, 8);
+// left border
 for(let i = 0; i < 10; i++){
-	ctx.imageSmoothingEnabled = false;
-	ctx.drawImage( myImgElement, 478, 671, 9, 16, 0, 153-i*16, 9, 16);
+	ctx.drawImage( myImgElement, 475, 671, 12, 16, 0, 199-i*16, 12, 16);
 }
+
+// Mines counter
+ctx.drawImage( myImgElement, 491, 391, 41, 25, 16, 15, 41, 25);
+
+// Time counter
+ctx.drawImage( myImgElement, 491, 391, 41, 25, 125, 15, 41, 25);
+
+// 79 Face
+ctx.drawImage( myImgElement, 602, 391, 26, 26, 79, 15, 26, 26);
 
 // positions for the image boxes
 const boxImage = new Map();
@@ -163,7 +174,7 @@ function updateGrid(){
 						break;
 				}
 			}
-			ctx.drawImage( myImgElement, position[0], position[1], 16, 16, j*16 + 9, i*16 + 9, 16, 16);
+			ctx.drawImage( myImgElement, position[0], position[1], 16, 16, j*16 + 12, i*16 + 55, 16, 16);
 		}
 	}
 }
@@ -229,10 +240,10 @@ canvasElem.addEventListener("mousedown", async e => {
 	let x = e.clientX - rect.left;
 	let y = e.clientY - rect.top;
 
-	if(x < 9 || y < 9 || x > 168 || y > 168 || gameStatus === "finished")
+	if(x < 9 || y < 55 || x > 169 || y > 215 || gameStatus === "finished")
 		return;
 
-	let row = Math.floor((y - 9)/16);
+	let row = Math.floor((y - 55)/16);
 	let col = Math.floor((x - 9)/16);
 
 	// right click
