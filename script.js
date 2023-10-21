@@ -1,6 +1,7 @@
 let width = 10;
 let height = 10;
 let gameStatus = "notStarted";
+let startTime = -1;
 
 // false to not display true to display grid value
 let gridValues = [...Array(10)].map(e => Array(10));
@@ -272,8 +273,9 @@ canvasElem.addEventListener("mousedown", async e => {
 			generateMines(10);
 
 			calcAroundMine();
-
+			startTime = new Date().getTime();
 			gameStatus = "started";
+			timer();
 		}
 
 		if(gridDisplay[row][col] === "hidden"){
@@ -307,3 +309,49 @@ canvasElem.addEventListener("mousedown", async e => {
 	await new Promise(resolve => setTimeout(resolve, 100));
 	updateGrid();
 });
+
+async function timer() {
+	let timePassSec = 0;
+	while(gameStatus === "started"){
+		timePassSec++;
+		updateTime(timePassSec);
+		await new Promise(resolve => setTimeout(resolve, 1000));
+	}
+}
+
+// 12 22
+let pixelTime = new Map();
+pixelTime.set("1", [15, 147]);
+pixelTime.set("2", [29, 147]);
+pixelTime.set("3", [43, 147]);
+pixelTime.set("4", [57, 147]);
+pixelTime.set("5", [71, 147]);
+pixelTime.set("6", [85, 147]);
+pixelTime.set("7", [99, 147]);
+pixelTime.set("8", [113, 147]);
+pixelTime.set("9", [127, 147]);
+pixelTime.set("0", [141, 147]);
+pixelTime.set("-", [155, 147]);
+pixelTime.set(" ", [169, 147]);
+
+let digitZero = pixelTime.get("0");
+ctx.drawImage( myImgElement, digitZero[0], digitZero[1], 12, 22, 18, 17, 12, 22);
+ctx.drawImage( myImgElement, digitZero[0], digitZero[1], 12, 22, 31, 17, 12, 22);
+ctx.drawImage( myImgElement, digitZero[0], digitZero[1], 12, 22, 44, 17, 12, 22);
+
+ctx.drawImage( myImgElement, digitZero[0], digitZero[1], 12, 22, 127, 17, 12, 22);
+ctx.drawImage( myImgElement, digitZero[0], digitZero[1], 12, 22, 140, 17, 12, 22);
+ctx.drawImage( myImgElement, digitZero[0], digitZero[1], 12, 22, 153, 17, 12, 22);
+
+function updateTime(seconds){
+	let secStr = seconds.toString().padStart(3, "0");
+
+	let position = 0;
+
+	position = pixelTime.get(secStr[0]);
+	ctx.drawImage( myImgElement, position[0], position[1], 12, 22, 127, 17, 12, 22);
+	position = pixelTime.get(secStr[1]);
+	ctx.drawImage( myImgElement, position[0], position[1], 12, 22, 140, 17, 12, 22);
+	position = pixelTime.get(secStr[2]);
+	ctx.drawImage( myImgElement, position[0], position[1], 12, 22, 153, 17, 12, 22);
+}
