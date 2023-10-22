@@ -2,6 +2,8 @@ let width = 10;
 let height = 10;
 let gameStatus = "notStarted";
 let startTime = -1;
+let numMines = 0;
+let numFlag = 0;
 
 // false to not display true to display grid value
 let gridValues = [...Array(10)].map(e => Array(10));
@@ -107,7 +109,7 @@ ctx.drawImage( myImgElement, 491, 391, 41, 25, 16, 15, 41, 25);
 // Time counter
 ctx.drawImage( myImgElement, 491, 391, 41, 25, 125, 15, 41, 25);
 
-// 79 Face
+// Face
 ctx.drawImage( myImgElement, 602, 391, 26, 26, 79, 15, 26, 26);
 
 // positions for the image boxes
@@ -236,10 +238,18 @@ function showNotMines() {
 
 canvasElem.addEventListener("mousedown", async e => {
 
+
+});
+
+canvasElem.addEventListener("mouseup", async e => {
 	// get mouse position
 	let rect = canvas.getBoundingClientRect();
 	let x = e.clientX - rect.left;
 	let y = e.clientY - rect.top;
+	
+	if(79 <= x && 15 <= y && x <= 105 && y <= 41){
+		resetGame();
+	}
 
 	if(x < 9 || y < 55 || x > 169 || y > 215 || gameStatus === "finished")
 		return;
@@ -249,11 +259,17 @@ canvasElem.addEventListener("mousedown", async e => {
 
 	// right click
 	if(e.button === 2){
+		if (gameStatus === "notStarted")
+			return;
+
 		if(gridDisplay[row][col] === "flag"){
 			gridDisplay[row][col] = "hidden";
+			numFlag--;
 		}else if(gridDisplay[row][col] === "hidden"){
 			gridDisplay[row][col] = "flag"
+			numFlag++;
 		}
+		updateGuess();
 	}
 
 	if(e.button === 0){
@@ -264,13 +280,15 @@ canvasElem.addEventListener("mousedown", async e => {
 		if( gameStatus === "notStarted"){
 			for(let i = 0; i < 10; i++){
 				for(let j = 0; j < 10;j++){
-					if(gridValues[i][j] === 0 && (row !== i && col !== j)){
+					if(gridValues[i][j] === 0 && !(row === i && col === j)){
 						nonMineCoord.push([i, j]);
 					}
 				}
 			}
 
 			generateMines(10);
+			numMines = 10;
+			updateGuess();
 
 			calcAroundMine();
 			startTime = new Date().getTime();
@@ -298,7 +316,7 @@ canvasElem.addEventListener("mousedown", async e => {
 			}
 		}
 		await new Promise(resolve => setTimeout(resolve, 10));
-		if(count == 10){
+		if(count === numMines){
 			gameStatus = "gameOver";
 			console.log("win")
 			showAllMines();
@@ -308,7 +326,8 @@ canvasElem.addEventListener("mousedown", async e => {
 
 	await new Promise(resolve => setTimeout(resolve, 100));
 	updateGrid();
-});
+})
+
 
 async function timer() {
 	let timePassSec = 0;
@@ -354,4 +373,46 @@ function updateTime(seconds){
 	ctx.drawImage( myImgElement, position[0], position[1], 12, 22, 140, 17, 12, 22);
 	position = pixelTime.get(secStr[2]);
 	ctx.drawImage( myImgElement, position[0], position[1], 12, 22, 153, 17, 12, 22);
+}
+
+function updateGuess(){
+	let guessStr;
+
+	
+	let position;
+	let diffGuess = numMines - numFlag;
+
+	if(numMines - numFlag < 0){
+		diffGuess = Math.abs(numMines - numFlag);
+	}
+
+	guessStr = diffGuess.toString().padStart(3, "0");
+
+	if(numMines - numFlag < 0){
+		position = pixelTime.get("-");
+	} else {
+		position = pixelTime.get(guessStr[0]);
+	}
+
+	ctx.drawImage( myImgElement, position[0], position[1], 12, 22, 18, 17, 12, 22);
+	position = pixelTime.get(guessStr[1]);
+	ctx.drawImage( myImgElement, position[0], position[1], 12, 22, 31, 17, 12, 22);
+	position = pixelTime.get(guessStr[2]);
+	ctx.drawImage( myImgElement, position[0], position[1], 12, 22, 44, 17, 12, 22);
+}
+
+function resetGame() {
+	for(let i = 0; i < 10; i++){
+		for(let j = 0; j < 10; j++){
+			gridValues[i][j] = 0;
+			gridDisplay[i][j] = "hidden";
+		}
+	}
+	gameStatus = "notStarted";
+	numMines = 0;
+	numFlag = 0;
+
+	updateGrid();
+	updateGuess();
+	updateTime(0);
 }

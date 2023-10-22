@@ -1,0 +1,11 @@
+#canvasContainer {
+	display: flex;
+	align-items: bottom;
+	width: max-content;
+	padding-top: 24px;
+
+	border-style: solid;
+	border-top-left-radius: 8px;
+	border-top-right-radius: 8px;
+	background-color: blue;
+}
