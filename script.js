@@ -218,17 +218,28 @@ async function showBoxes(m, n){
 function showAllMines(){
 	for(let i = 0; i < 10; i++){
 		for(let j = 0; j < 10; j++){
-			if(gridValues[i][j] === 9){
+			if(gridValues[i][j] === 9 && gridDisplay[i][j] !== "flag"){
 				gridDisplay[i][j] = "shown";
 			}
 		}
 	}
 }
 
-function showNotMines() {
+function flagAllMines(){
 	for(let i = 0; i < 10; i++){
 		for(let j = 0; j < 10; j++){
-			if(gridDisplay[i][j] === "flag"){
+			if(gridValues[i][j] === 9){
+				gridDisplay[i][j] = "flag";
+			}
+		}
+	}
+	
+}
+
+function showWrongMines() {
+	for(let i = 0; i < 10; i++){
+		for(let j = 0; j < 10; j++){
+			if(gridDisplay[i][j] === "flag" && gridValues[i][j] !== 9){
 				gridValues[i][j] = 11;
 				gridDisplay[i][j] = "shown";
 			}
@@ -236,12 +247,18 @@ function showNotMines() {
 	}
 }
 
+let isHold = false;
+
 canvasElem.addEventListener("mousedown", async e => {
 
+	isHold = true;
 
+	
 });
 
 canvasElem.addEventListener("mouseup", async e => {
+	isHold = false;
+
 	// get mouse position
 	let rect = canvas.getBoundingClientRect();
 	let x = e.clientX - rect.left;
@@ -251,11 +268,16 @@ canvasElem.addEventListener("mouseup", async e => {
 		resetGame();
 	}
 
-	if(x < 9 || y < 55 || x > 169 || y > 215 || gameStatus === "finished")
+
+	if(gameStatus === "gameOver" || gameStatus === "gameWon" || gameStatus === "finished"){
+		return;
+	}
+
+	if(x < 12 || y < 55 || x > 169 || y > 215)
 		return;
 
 	let row = Math.floor((y - 55)/16);
-	let col = Math.floor((x - 9)/16);
+	let col = Math.floor((x - 12)/16);
 
 	// right click
 	if(e.button === 2){
@@ -273,14 +295,11 @@ canvasElem.addEventListener("mouseup", async e => {
 	}
 
 	if(e.button === 0){
-		if(gameStatus === "gameOver"){
-			return;
-		}
 
 		if( gameStatus === "notStarted"){
 			for(let i = 0; i < 10; i++){
 				for(let j = 0; j < 10;j++){
-					if(gridValues[i][j] === 0 && !(row === i && col === j)){
+					if(!(row === i && col === j)){
 						nonMineCoord.push([i, j]);
 					}
 				}
@@ -301,7 +320,7 @@ canvasElem.addEventListener("mouseup", async e => {
 				gridValues[row][col] = 10;
 				gameStatus = "gameOver";
 				showAllMines();
-				showNotMines();
+				showWrongMines();
 			}
 			showBoxes(row, col);
 		}
@@ -317,10 +336,9 @@ canvasElem.addEventListener("mouseup", async e => {
 		}
 		await new Promise(resolve => setTimeout(resolve, 10));
 		if(count === numMines){
-			gameStatus = "gameOver";
+			gameStatus = "gameWon";
 			console.log("win")
-			showAllMines();
-			showNotMines();
+			flagAllMines();
 		}
 	}
 
@@ -328,6 +346,47 @@ canvasElem.addEventListener("mouseup", async e => {
 	updateGrid();
 })
 
+let prevRow = -1;
+let prevCol = -1;
+let row = 0;
+let col = 0;
+document.addEventListener('mousemove', e => {
+    if (isHold) {
+		
+		let rect = canvas.getBoundingClientRect();
+			
+		let x = e.clientX - rect.left;
+		let y = e.clientY - rect.top;
+
+		let row = Math.floor((y - 55)/16);
+		let col = Math.floor((x - 12)/16);
+
+		if(79 <= x && 15 <= y && x <= 105 && y <= 41){
+			
+		}
+
+		if(12 <= x && 55 <= y && x <= 169 && y <= 215){
+			if(gridDisplay[row][col] === "hidden"){
+				if(prevRow !== row || prevCol !== col){
+			
+					if( prevRow !== -1 && prevCol !== -1 && gridDisplay[prevRow][prevCol] !== "shown") {
+						let position = boxImage.get("hidden");
+						ctx.drawImage( myImgElement, position[0], position[1], 16, 16, prevCol*16 + 12, prevRow*16 + 55, 16, 16);
+					}
+
+					position = boxImage.get("blank");
+					ctx.drawImage( myImgElement, position[0], position[1], 16, 16, col*16 + 12, row*16 + 55, 16, 16);
+					
+					prevRow = row;
+					prevCol = col;
+
+				}
+					
+			}
+		}
+
+	}
+})
 
 async function timer() {
 	let timePassSec = 0;
