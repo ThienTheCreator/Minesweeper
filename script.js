@@ -250,10 +250,7 @@ function showWrongMines() {
 let isHold = false;
 
 canvasElem.addEventListener("mousedown", async e => {
-
 	isHold = true;
-
-	
 });
 
 canvasElem.addEventListener("mouseup", async e => {
@@ -269,7 +266,7 @@ canvasElem.addEventListener("mouseup", async e => {
 	}
 
 
-	if(gameStatus === "gameOver" || gameStatus === "gameWon" || gameStatus === "finished"){
+	if(gameStatus === "gameOver" || gameStatus === "gameWon"){
 		return;
 	}
 
@@ -351,6 +348,9 @@ let prevCol = -1;
 let row = 0;
 let col = 0;
 document.addEventListener('mousemove', e => {
+	if( e.buttons === 0 || e.buttons === 2)
+		return
+
     if (isHold) {
 		
 		let rect = canvas.getBoundingClientRect();
