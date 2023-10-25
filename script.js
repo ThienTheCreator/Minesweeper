@@ -11,55 +11,27 @@ let gridDisplay = [...Array(10)].map(e => Array(10));
 let nonMineCoord = [];
 
 let count = 0;
-for(let i = 0; i < 10; i++){
-	for(let j = 0; j < 10; j++){
-		gridValues[i][j] = 0;
-		gridDisplay[i][j] = 'hidden';
-	}
-}
 
-function addRandomMine(){
-	let randomIndex = Math.floor(Math.random() * nonMineCoord.length);
-	let position = nonMineCoord[randomIndex];
+const sleep = (ms) => new Promise(res => setTimeout(res, ms));
 
-	let row = position[0];
-	let col = position[1];
-	gridValues[row][col] = 9;
-
-	nonMineCoord.splice(randomIndex, 1);
-}
-
-// m is the number of mines
-function generateMines(m){
-	for(let i = 0; i < m; i++){
-		addRandomMine();
-	}
-}
-
-function calculateValues(m, n){
-	for(let i = m-1; i <= m + 1; i++){
-		for(let j = n - 1; j <= n + 1; j++){
-			if(i >= 0 && i < width && j >= 0 && j < height){
-				if(gridValues[i][j] !== 9){
-					gridValues[i][j]++;
-				}
-			}
-		}
-	}
-}
-
-function calcAroundMine(){
-	for(let i = 0; i < width; i++){
-		for(let j = 0; j < height; j++){
-			if(gridValues[i][j] === 9){
-				calculateValues(i, j);
-			}
-		}
-	}
-}
 
 let canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
+const myImgElement = document.getElementById("myImag");
+
+let boxImage = new Map();
+
+let pixelTime = new Map();
+
+async function setup() {
+	await sleep(10);
+	for(let i = 0; i < 10; i++){
+		for(let j = 0; j < 10; j++){
+			gridValues[i][j] = 0;
+			gridDisplay[i][j] = 'hidden';
+		}
+	}
+
 ctx.imageSmoothingEnabled = false;
 canvas.width = 180;
 canvas.height = 223;
@@ -67,7 +39,6 @@ canvas.height = 223;
 // canvas.fillStyle = "rgba("+r+","+g+","+b+","+(a/255)+")";
 // canvas.fillRect( 1, 1, 1, 1 );
 
-const myImgElement = document.getElementById("myImag");
 
 // drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
 // empty box
@@ -113,7 +84,6 @@ ctx.drawImage( myImgElement, 491, 391, 41, 25, 125, 15, 41, 25);
 ctx.drawImage( myImgElement, 602, 391, 26, 26, 79, 15, 26, 26);
 
 // positions for the image boxes
-const boxImage = new Map();
 boxImage.set('hidden', [14, 195]);
 boxImage.set('blank', [31, 195]);
 boxImage.set('flag', [48, 195]);
@@ -128,6 +98,74 @@ boxImage.set('5', [82, 212]);
 boxImage.set('6', [99, 212]);
 boxImage.set('7', [116, 212]);
 boxImage.set('8', [133, 212]);
+
+pixelTime.set("1", [15, 147]);
+pixelTime.set("2", [29, 147]);
+pixelTime.set("3", [43, 147]);
+pixelTime.set("4", [57, 147]);
+pixelTime.set("5", [71, 147]);
+pixelTime.set("6", [85, 147]);
+pixelTime.set("7", [99, 147]);
+pixelTime.set("8", [113, 147]);
+pixelTime.set("9", [127, 147]);
+pixelTime.set("0", [141, 147]);
+pixelTime.set("-", [155, 147]);
+pixelTime.set(" ", [169, 147]);
+
+
+let digitZero = pixelTime.get("0");
+ctx.drawImage( myImgElement, digitZero[0], digitZero[1], 12, 22, 18, 17, 12, 22);
+ctx.drawImage( myImgElement, digitZero[0], digitZero[1], 12, 22, 31, 17, 12, 22);
+ctx.drawImage( myImgElement, digitZero[0], digitZero[1], 12, 22, 44, 17, 12, 22);
+
+ctx.drawImage( myImgElement, digitZero[0], digitZero[1], 12, 22, 127, 17, 12, 22);
+ctx.drawImage( myImgElement, digitZero[0], digitZero[1], 12, 22, 140, 17, 12, 22);
+ctx.drawImage( myImgElement, digitZero[0], digitZero[1], 12, 22, 153, 17, 12, 22);
+
+updateGrid();
+}
+
+setup();
+
+function addRandomMine(){
+	let randomIndex = Math.floor(Math.random() * nonMineCoord.length);
+	let position = nonMineCoord[randomIndex];
+
+	let row = position[0];
+	let col = position[1];
+	gridValues[row][col] = 9;
+
+	nonMineCoord.splice(randomIndex, 1);
+}
+
+// m is the number of mines
+function generateMines(m){
+	for(let i = 0; i < m; i++){
+		addRandomMine();
+	}
+}
+
+function calculateValues(m, n){
+	for(let i = m-1; i <= m + 1; i++){
+		for(let j = n - 1; j <= n + 1; j++){
+			if(i >= 0 && i < width && j >= 0 && j < height){
+				if(gridValues[i][j] !== 9){
+					gridValues[i][j]++;
+				}
+			}
+		}
+	}
+}
+
+function calcAroundMine(){
+	for(let i = 0; i < width; i++){
+		for(let j = 0; j < height; j++){
+			if(gridValues[i][j] === 9){
+				calculateValues(i, j);
+			}
+		}
+	}
+}
 
 function updateGrid(){
 	for(let i = 0; i < 10; i++){
@@ -181,7 +219,6 @@ function updateGrid(){
 		}
 	}
 }
-updateGrid();
 
 canvasElem = document.querySelector("canvas");
 
@@ -211,7 +248,7 @@ async function showBoxes(m, n){
 		}
 	}
 
-	await new Promise(resolve => setTimeout(resolve, 1));
+	await sleep(1);
 	gridDisplay[m][n] = "shown";
 }
 
@@ -251,6 +288,45 @@ let isHold = false;
 
 canvasElem.addEventListener("mousedown", async e => {
 	isHold = true;
+
+	let rect = canvas.getBoundingClientRect();
+	let x = e.clientX - rect.left;
+	let y = e.clientY - rect.top;
+	
+	let row = Math.floor((y - 55)/16);
+	let col = Math.floor((x - 12)/16);	console.log(x, y);
+	
+
+	if(79 <= x && x <= 105 && 15 <= y && y <= 41){
+		ctx.drawImage( myImgElement, 39, 170, 24, 24, 80, 16, 24, 24);
+	}
+
+	if(12 <= x && 55 <= y && x <= 169 && y <= 215){
+	
+		// right click
+		if(e.button === 2){
+			if (gameStatus === "notStarted")
+				return;
+
+			if(gridDisplay[row][col] === "flag"){
+				gridDisplay[row][col] = "hidden";
+				numFlag--;
+			}else if(gridDisplay[row][col] === "hidden"){
+				gridDisplay[row][col] = "flag"
+				numFlag++;
+			}
+			updateGuess();
+			updateGrid();
+			return;
+		}
+
+		if(gridDisplay[row][col] === "hidden" || gridDisplay[row][col] !== "flag"){
+			let position = boxImage.get("blank");
+			ctx.drawImage( myImgElement, position[0], position[1], 16, 16, col*16 + 12, row*16 + 55, 16, 16);
+		}
+	}
+
+
 });
 
 canvasElem.addEventListener("mouseup", async e => {
@@ -262,6 +338,7 @@ canvasElem.addEventListener("mouseup", async e => {
 	let y = e.clientY - rect.top;
 	
 	if(79 <= x && 15 <= y && x <= 105 && y <= 41){
+		ctx.drawImage( myImgElement, 14, 170, 24, 24, 80, 16, 24, 24);
 		resetGame();
 	}
 
@@ -276,20 +353,6 @@ canvasElem.addEventListener("mouseup", async e => {
 	let row = Math.floor((y - 55)/16);
 	let col = Math.floor((x - 12)/16);
 
-	// right click
-	if(e.button === 2){
-		if (gameStatus === "notStarted")
-			return;
-
-		if(gridDisplay[row][col] === "flag"){
-			gridDisplay[row][col] = "hidden";
-			numFlag--;
-		}else if(gridDisplay[row][col] === "hidden"){
-			gridDisplay[row][col] = "flag"
-			numFlag++;
-		}
-		updateGuess();
-	}
 
 	if(e.button === 0){
 
@@ -322,7 +385,7 @@ canvasElem.addEventListener("mouseup", async e => {
 			showBoxes(row, col);
 		}
 
-		await new Promise(resolve => setTimeout(resolve, 10));
+		await sleep(10);
 		let count = 0;
 		for(let i = 0; i < 10; i++){
 			for( let j = 0; j < 10; j++){
@@ -331,7 +394,7 @@ canvasElem.addEventListener("mouseup", async e => {
 				}
 			}
 		}
-		await new Promise(resolve => setTimeout(resolve, 10));
+		await sleep(10);
 		if(count === numMines){
 			gameStatus = "gameWon";
 			console.log("win")
@@ -339,7 +402,7 @@ canvasElem.addEventListener("mouseup", async e => {
 		}
 	}
 
-	await new Promise(resolve => setTimeout(resolve, 100));
+	await sleep(100);
 	updateGrid();
 })
 
@@ -362,7 +425,9 @@ document.addEventListener('mousemove', e => {
 		let col = Math.floor((x - 12)/16);
 
 		if(79 <= x && 15 <= y && x <= 105 && y <= 41){
-			
+			ctx.drawImage( myImgElement, 39, 170, 24, 24, 80, 16, 24, 24);
+		}else {
+			ctx.drawImage( myImgElement, 14, 170, 24, 24, 80, 16, 24, 24);
 		}
 
 		if(12 <= x && 55 <= y && x <= 169 && y <= 215){
@@ -396,30 +461,6 @@ async function timer() {
 		await new Promise(resolve => setTimeout(resolve, 1000));
 	}
 }
-
-// 12 22
-let pixelTime = new Map();
-pixelTime.set("1", [15, 147]);
-pixelTime.set("2", [29, 147]);
-pixelTime.set("3", [43, 147]);
-pixelTime.set("4", [57, 147]);
-pixelTime.set("5", [71, 147]);
-pixelTime.set("6", [85, 147]);
-pixelTime.set("7", [99, 147]);
-pixelTime.set("8", [113, 147]);
-pixelTime.set("9", [127, 147]);
-pixelTime.set("0", [141, 147]);
-pixelTime.set("-", [155, 147]);
-pixelTime.set(" ", [169, 147]);
-
-let digitZero = pixelTime.get("0");
-ctx.drawImage( myImgElement, digitZero[0], digitZero[1], 12, 22, 18, 17, 12, 22);
-ctx.drawImage( myImgElement, digitZero[0], digitZero[1], 12, 22, 31, 17, 12, 22);
-ctx.drawImage( myImgElement, digitZero[0], digitZero[1], 12, 22, 44, 17, 12, 22);
-
-ctx.drawImage( myImgElement, digitZero[0], digitZero[1], 12, 22, 127, 17, 12, 22);
-ctx.drawImage( myImgElement, digitZero[0], digitZero[1], 12, 22, 140, 17, 12, 22);
-ctx.drawImage( myImgElement, digitZero[0], digitZero[1], 12, 22, 153, 17, 12, 22);
 
 function updateTime(seconds){
 	let secStr = seconds.toString().padStart(3, "0");
@@ -474,4 +515,16 @@ function resetGame() {
 	updateGrid();
 	updateGuess();
 	updateTime(0);
+}
+
+function handleGameMenu(){
+	const dropdown = document.getElementById("dropdown-content");
+	const gameMenu = document.getElementById("game-menu");
+	if( dropdown.className === "dropdown-content-hidden" ) {
+		dropdown.className = "dropdown-content-shown";
+		gameMenu.className = "blue-background";
+	} else {
+		dropdown.className = "dropdown-content-hidden";
+		gameMenu.className = "none-background";
+	}
 }

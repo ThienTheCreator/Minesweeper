@@ -10,16 +10,25 @@
   </head>
   <body>
 	<center>
-		<h1>Minesweeper</h1>
-		<div id="canvasContainer">
-			<div id="iconContainer">
-				<div id="mineContainer">
-					<img id="mineIcon" src="mineIcon.png" alt="mine" >
+		<div id="canvas-container">
+			<div id="icon-container">
+				<div id="mine-container">
+					<img id="mine-icon" src="mineIcon.png" alt="mine" >
 					Minesweeper
 				</div>
-				<div class="windowIcon" id="minimizeIcon"></div>
-				<div class="windowIcon" id="zoomIcon"></div>
-				<div class="windowIcon" id="closeIcon"></div>
+				<div class="window-icon" id="minimize-icon"></div>
+				<div class="window-icon" id="zoom-icon"></div>
+				<div class="window-icon" id="close-icon"></div>
+			</div>
+			<div class="dropdown" id="menu-container">
+				<button class="none-background" id="game-menu" onclick="handleGameMenu()">Game</button>
+				<div class="dropdown-content-hidden" id="dropdown-content">
+					<button>New</button>
+					
+					<button>Beginner</button>
+					<button>Intermediate</button>
+					<button>Expert</button>
+				</div>
 			</div>
     		<canvas id="canvas"></canvas>
 		</div>
