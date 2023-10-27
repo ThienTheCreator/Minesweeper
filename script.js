@@ -517,14 +517,17 @@ function resetGame() {
 	updateTime(0);
 }
 
+let isMenuClicked = false;
 function handleGameMenu(){
 	const dropdown = document.getElementById("dropdown-content");
 	const gameMenu = document.getElementById("game-menu");
 	if( dropdown.className === "dropdown-content-hidden" ) {
 		dropdown.className = "dropdown-content-shown";
 		gameMenu.className = "blue-background";
+		isMenuClicked = true;
 	} else {
 		dropdown.className = "dropdown-content-hidden";
 		gameMenu.className = "none-background";
+		isMenuClicked = false;
 	}
 }

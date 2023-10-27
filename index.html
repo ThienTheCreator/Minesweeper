@@ -23,11 +23,33 @@
 			<div class="dropdown" id="menu-container">
 				<button class="none-background" id="game-menu" onclick="handleGameMenu()">Game</button>
 				<div class="dropdown-content-hidden" id="dropdown-content">
-					<button>New</button>
-					
-					<button>Beginner</button>
-					<button>Intermediate</button>
-					<button>Expert</button>
+					<div onclick="resetGame()">
+						<div class="checked-box-hidden">
+						</div>
+						New
+					</div>
+					<div class="separator">
+					</div>
+					<div class="difficultyOption">
+						<div class="checked-box">
+							<img src="checked.png" alt="checked" width="7px" height="7px">
+						</div>
+						<div>
+							Beginner
+						</div>
+					</div>
+					<div class="difficultyOption">
+						<div class="checked-box-hidden">
+							<img src="checked.png" alt="checked" width="7px" height="7px">
+						</div>
+						Intermediate
+					</div>
+					<div class="difficultyOption">
+						<div class="checked-box-hidden">
+							<img src="checked.png" alt="checked" width="7px" height="7px">
+						</div>
+						Expert
+					</div>
 				</div>
 			</div>
     		<canvas id="canvas"></canvas>
