@@ -6,8 +6,8 @@ let numMines = 0;
 let numFlag = 0;
 
 // false to not display true to display grid value
-let gridValues = [...Array(10)].map(e => Array(10));
-let gridDisplay = [...Array(10)].map(e => Array(10));
+let gridValues = [...Array(30)].map(e => Array(16));
+let gridDisplay = [...Array(30)].map(e => Array(16));
 let nonMineCoord = [];
 
 let count = 0;
@@ -23,18 +23,39 @@ let boxImage = new Map();
 
 let pixelTime = new Map();
 
-async function setup() {
-	await sleep(10);
-	for(let i = 0; i < 10; i++){
-		for(let j = 0; j < 10; j++){
+function setupCanvas(difficulty){
+
+
+
+
+if(difficulty === "beginner"){
+	width = 10;
+	height = 10;
+	numMines = 10;
+}
+
+if(difficulty === "intermediate"){
+	width = 16;
+	height = 16;
+	numMines = 40;
+}
+
+if(difficulty === "expert"){
+	width = 30;
+	height = 16;
+	numMines = 99;
+}
+	
+	for(let i = 0; i < height; i++){
+		for(let j = 0; j < width; j++){
 			gridValues[i][j] = 0;
 			gridDisplay[i][j] = 'hidden';
 		}
 	}
 
 ctx.imageSmoothingEnabled = false;
-canvas.width = 180;
-canvas.height = 223;
+canvas.width = 16 * width + 20;
+canvas.height = 16 * height + 63;
 
 // canvas.fillStyle = "rgba("+r+","+g+","+b+","+(a/255)+")";
 // canvas.fillRect( 1, 1, 1, 1 );
@@ -49,39 +70,54 @@ ctx.imageSmoothingEnabled = false;
 // upper left corner
 ctx.drawImage( myImgElement, 475, 376, 12, 55, 0, 0, 12, 55);
 // top border
-for(let i = 0; i < 10; i ++){
-	ctx.drawImage( myImgElement, 535, 376, 16, 55, 12+i*16, 0, 16, 55);
+for(let i = 0; i < width; i ++){
+	ctx.drawImage( myImgElement, 535, 376, 16, 55, (16 * i + 12), 0, 16, 55);
 }
 
 // upper right corner
-ctx.drawImage( myImgElement, 743, 376, 8, 55, 172, 0, 8, 55);
+ctx.drawImage( myImgElement, 743, 376, 8, 55, (16 * width + 12), 0, 8, 55);
 // right border
-for(let i = 0; i < 10; i++){
-	ctx.drawImage( myImgElement, 743, 431, 8, 16, 172, 55+i*16, 8, 16);
+for(let i = 0; i < height; i++){
+	ctx.drawImage( myImgElement, 743, 431, 8, 16, (16 * width + 12), (16 * i + 55), 8, 16);
 }
 
 // lower right corner
-ctx.drawImage( myImgElement, 743, 687, 8, 8, 172, 215, 8, 8);
+ctx.drawImage( myImgElement, 743, 687, 8, 8, (16 * width + 12), (16 * height + 55), 8, 8);
 // bottom border
-for(let i = 0; i < 10; i++){
-	ctx.drawImage( myImgElement, 727, 687, 16, 8, 156-i*16, 215, 16, 8);
+for(let i = 0; i < width; i++){
+	ctx.drawImage( myImgElement, 727, 687, 16, 8, ((16 * width - 4) - 16 * i), (height * 16 + 55), 16, 8);
 }
 
 // lower left corner
-ctx.drawImage( myImgElement, 475, 687, 12, 8, 0, 215, 12, 8);
+ctx.drawImage( myImgElement, 475, 687, 12, 8, 0, (16 * height + 55), 12, 8);
 // left border
-for(let i = 0; i < 10; i++){
-	ctx.drawImage( myImgElement, 475, 671, 12, 16, 0, 199-i*16, 12, 16);
+for(let i = 0; i < height; i++){
+	ctx.drawImage( myImgElement, 475, 671, 12, 16, 0, ((16 * height + 39) - 16 * i), 12, 16);
 }
 
 // Mines counter
 ctx.drawImage( myImgElement, 491, 391, 41, 25, 16, 15, 41, 25);
 
 // Time counter
-ctx.drawImage( myImgElement, 491, 391, 41, 25, 125, 15, 41, 25);
+ctx.drawImage( myImgElement, 491, 391, 41, 25, (16 * (width - 3) + 13), 15, 41, 25);
 
 // Face
-ctx.drawImage( myImgElement, 602, 391, 26, 26, 79, 15, 26, 26);
+ctx.drawImage( myImgElement, 602, 391, 26, 26, (16 * (width >> 1) - 1), 15, 26, 26);
+
+let digitZero = pixelTime.get("0");
+ctx.drawImage( myImgElement, digitZero[0], digitZero[1], 12, 22, 18, 17, 12, 22);
+ctx.drawImage( myImgElement, digitZero[0], digitZero[1], 12, 22, 31, 17, 12, 22);
+ctx.drawImage( myImgElement, digitZero[0], digitZero[1], 12, 22, 44, 17, 12, 22);
+
+ctx.drawImage( myImgElement, digitZero[0], digitZero[1], 12, 22, 16 * (width - 3) + 15, 17, 12, 22);
+ctx.drawImage( myImgElement, digitZero[0], digitZero[1], 12, 22, 16 * (width - 3) + 28, 17, 12, 22);
+ctx.drawImage( myImgElement, digitZero[0], digitZero[1], 12, 22, 16 * (width - 3) + 41, 17, 12, 22);
+
+updateGrid();
+}
+
+async function setup() {
+	await sleep(10);
 
 // positions for the image boxes
 boxImage.set('hidden', [14, 195]);
@@ -112,17 +148,7 @@ pixelTime.set("0", [141, 147]);
 pixelTime.set("-", [155, 147]);
 pixelTime.set(" ", [169, 147]);
 
-
-let digitZero = pixelTime.get("0");
-ctx.drawImage( myImgElement, digitZero[0], digitZero[1], 12, 22, 18, 17, 12, 22);
-ctx.drawImage( myImgElement, digitZero[0], digitZero[1], 12, 22, 31, 17, 12, 22);
-ctx.drawImage( myImgElement, digitZero[0], digitZero[1], 12, 22, 44, 17, 12, 22);
-
-ctx.drawImage( myImgElement, digitZero[0], digitZero[1], 12, 22, 127, 17, 12, 22);
-ctx.drawImage( myImgElement, digitZero[0], digitZero[1], 12, 22, 140, 17, 12, 22);
-ctx.drawImage( myImgElement, digitZero[0], digitZero[1], 12, 22, 153, 17, 12, 22);
-
-updateGrid();
+setupCanvas("beginner");
 }
 
 setup();
@@ -158,8 +184,8 @@ function calculateValues(m, n){
 }
 
 function calcAroundMine(){
-	for(let i = 0; i < width; i++){
-		for(let j = 0; j < height; j++){
+	for(let i = 0; i < height; i++){
+		for(let j = 0; j < width; j++){
 			if(gridValues[i][j] === 9){
 				calculateValues(i, j);
 			}
@@ -168,8 +194,8 @@ function calcAroundMine(){
 }
 
 function updateGrid(){
-	for(let i = 0; i < 10; i++){
-		for(let j = 0; j < 10; j++){
+	for(let i = 0; i < height; i++){
+		for(let j = 0; j < width; j++){
 			let position;
 			if(gridDisplay[i][j] === "hidden"){
 				position = boxImage.get('hidden');
@@ -229,7 +255,7 @@ canvasElem.oncontextmenu = e => {
 };
 
 async function showBoxes(m, n){
-	if(m < 0 || n < 0 || m >= width || n >= height){
+	if(m < 0 || n < 0 || m >= height || n >= width){
 		return;
 	}
 
@@ -297,8 +323,8 @@ canvasElem.addEventListener("mousedown", async e => {
 	let col = Math.floor((x - 12)/16);	console.log(x, y);
 	
 
-	if(79 <= x && x <= 105 && 15 <= y && y <= 41){
-		ctx.drawImage( myImgElement, 39, 170, 24, 24, 80, 16, 24, 24);
+	if(16 * (width >> 1) - 1 <= x && x <= 16 * (width >> 1) + 25 && 15 <= y && y <= 41){
+		ctx.drawImage( myImgElement, 39, 170, 24, 24, 16 * (width >> 1), 16, 24, 24);
 	}
 
 	if(12 <= x && 55 <= y && x <= 169 && y <= 215){
@@ -320,9 +346,9 @@ canvasElem.addEventListener("mousedown", async e => {
 			return;
 		}
 
-		if(gridDisplay[row][col] === "hidden" || gridDisplay[row][col] !== "flag"){
+		if(gridDisplay[row][col] === "hidden"){
 			let position = boxImage.get("blank");
-			ctx.drawImage( myImgElement, position[0], position[1], 16, 16, col*16 + 12, row*16 + 55, 16, 16);
+			ctx.drawImage( myImgElement, position[0], position[1], 16, 16, 16 * col + 12, 16 * row + 55, 16, 16);
 		}
 	}
 
@@ -337,8 +363,8 @@ canvasElem.addEventListener("mouseup", async e => {
 	let x = e.clientX - rect.left;
 	let y = e.clientY - rect.top;
 	
-	if(79 <= x && 15 <= y && x <= 105 && y <= 41){
-		ctx.drawImage( myImgElement, 14, 170, 24, 24, 80, 16, 24, 24);
+	if(16 * (width >> 1) - 1 <= x && x <= 16 * (width >> 1) + 25 && 15 <= y && y <= 41){
+		ctx.drawImage( myImgElement, 14, 170, 24, 24, 16 * (width >> 1), 16, 24, 24);
 		resetGame();
 	}
 
@@ -424,10 +450,10 @@ document.addEventListener('mousemove', e => {
 		let row = Math.floor((y - 55)/16);
 		let col = Math.floor((x - 12)/16);
 
-		if(79 <= x && 15 <= y && x <= 105 && y <= 41){
-			ctx.drawImage( myImgElement, 39, 170, 24, 24, 80, 16, 24, 24);
+		if(16 * (width >> 1) - 1 <= x && x <= 16 * (width) + 25 && 15 <= y && y <= 41){
+			ctx.drawImage( myImgElement, 39, 170, 24, 24, 16 * (width >> 1), 16, 24, 24);
 		}else {
-			ctx.drawImage( myImgElement, 14, 170, 24, 24, 80, 16, 24, 24);
+			ctx.drawImage( myImgElement, 14, 170, 24, 24, 16 * (width >> 1), 16, 24, 24);
 		}
 
 		if(12 <= x && 55 <= y && x <= 169 && y <= 215){
@@ -468,11 +494,11 @@ function updateTime(seconds){
 	let position = 0;
 
 	position = pixelTime.get(secStr[0]);
-	ctx.drawImage( myImgElement, position[0], position[1], 12, 22, 127, 17, 12, 22);
+	ctx.drawImage( myImgElement, position[0], position[1], 12, 22, 16 * (width - 3) + 15, 17, 12, 22);
 	position = pixelTime.get(secStr[1]);
-	ctx.drawImage( myImgElement, position[0], position[1], 12, 22, 140, 17, 12, 22);
+	ctx.drawImage( myImgElement, position[0], position[1], 12, 22, 16 * (width - 3) + 28, 17, 12, 22);
 	position = pixelTime.get(secStr[2]);
-	ctx.drawImage( myImgElement, position[0], position[1], 12, 22, 153, 17, 12, 22);
+	ctx.drawImage( myImgElement, position[0], position[1], 12, 22, 16 * (width - 3) + 41, 17, 12, 22);
 }
 
 function updateGuess(){
@@ -502,8 +528,8 @@ function updateGuess(){
 }
 
 function resetGame() {
-	for(let i = 0; i < 10; i++){
-		for(let j = 0; j < 10; j++){
+	for(let i = 0; i < height; i++){
+		for(let j = 0; j < width; j++){
 			gridValues[i][j] = 0;
 			gridDisplay[i][j] = "hidden";
 		}
@@ -517,17 +543,82 @@ function resetGame() {
 	updateTime(0);
 }
 
-let isMenuClicked = false;
+let isMenuOpen = false;
+const dropdown = document.getElementById("dropdown-content");
+const gameMenu = document.getElementById("game-menu");
+
 function handleGameMenu(){
-	const dropdown = document.getElementById("dropdown-content");
-	const gameMenu = document.getElementById("game-menu");
 	if( dropdown.className === "dropdown-content-hidden" ) {
-		dropdown.className = "dropdown-content-shown";
-		gameMenu.className = "blue-background";
-		isMenuClicked = true;
+		openGameMenu();
 	} else {
-		dropdown.className = "dropdown-content-hidden";
-		gameMenu.className = "none-background";
-		isMenuClicked = false;
+		closeGameMenu();
 	}
+}
+
+function openGameMenu() {
+	dropdown.className = "dropdown-content-shown";
+	gameMenu.className = "blue-background";
+	isMenuOpen = true;
+}
+
+function closeGameMenu() {
+	dropdown.className = "dropdown-content-hidden";
+	gameMenu.className = "none-background";
+	isMenuOpen = false;
+}
+
+function handleNewClicked() {
+	closeGameMenu();
+	resetGame();
+}
+
+let difficulty = "beginner";
+
+function hideCheck() {
+	let checkBox = document.getElementsByClassName("checked-box");
+	checkBox[0].className = "checked-box-hidden";
+}
+
+function setCheckedBox(difficulty) {
+	let checkBox = document.getElementsByClassName("checked-box-hidden");
+	let i = 0;
+
+	if(difficulty === "beginner"){
+		i = 1;
+	}
+
+	if(difficulty === "intermediate"){
+		i = 2;
+	}
+
+	if(difficulty === "expert"){
+		i = 3;
+	}
+
+	checkBox[i].className = "checked-box";
+}
+
+function handleBeginnerClicked() {
+	closeGameMenu();
+	hideCheck();
+	setCheckedBox("beginner");
+	setupCanvas("beginner");
+	resetGame();
+}
+
+
+function handleIntermediateClicked() {
+	closeGameMenu();
+	hideCheck();
+	setCheckedBox("intermediate");
+	setupCanvas("intermediate");
+	resetGame();
+}
+
+function handleExpertClicked() {
+	closeGameMenu();
+	hideCheck();
+	setCheckedBox("expert");
+	setupCanvas("expert");
+	resetGame();
 }
