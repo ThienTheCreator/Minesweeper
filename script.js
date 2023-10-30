@@ -1,9 +1,9 @@
-let width = 10;
-let height = 10;
+let totalColumns = 10;
+let totalRows = 10;
 let gameStatus = "notStarted";
 let startTime = -1;
-let numMines = 0;
-let numFlag = 0;
+let totalMines = 0;
+let numberOfFlags = 0;
 
 // false to not display true to display grid value
 let gridValues = [...Array(30)].map(e => Array(16));
@@ -25,37 +25,34 @@ let pixelTime = new Map();
 
 function setupCanvas(difficulty){
 
-
-
-
 if(difficulty === "beginner"){
-	width = 10;
-	height = 10;
-	numMines = 10;
+	totalColumns = 10;
+	totalRows = 10;
+	totalMines = 10;
 }
 
 if(difficulty === "intermediate"){
-	width = 16;
-	height = 16;
-	numMines = 40;
+	totalColumns = 16;
+	totalRows = 16;
+	totalMines = 40;
 }
 
 if(difficulty === "expert"){
-	width = 30;
-	height = 16;
-	numMines = 99;
+	totalColumns = 30;
+	totalRows = 16;
+	totalMines = 99;
 }
 	
-	for(let i = 0; i < height; i++){
-		for(let j = 0; j < width; j++){
+	for(let i = 0; i < totalRows; i++){
+		for(let j = 0; j < totalColumns; j++){
 			gridValues[i][j] = 0;
 			gridDisplay[i][j] = 'hidden';
 		}
 	}
 
 ctx.imageSmoothingEnabled = false;
-canvas.width = 16 * width + 20;
-canvas.height = 16 * height + 63;
+canvas.width = 16 * totalColumns + 20;
+canvas.height = 16 * totalRows + 63;
 
 // canvas.fillStyle = "rgba("+r+","+g+","+b+","+(a/255)+")";
 // canvas.fillRect( 1, 1, 1, 1 );
@@ -70,48 +67,48 @@ ctx.imageSmoothingEnabled = false;
 // upper left corner
 ctx.drawImage( myImgElement, 475, 376, 12, 55, 0, 0, 12, 55);
 // top border
-for(let i = 0; i < width; i ++){
+for(let i = 0; i < totalColumns; i ++){
 	ctx.drawImage( myImgElement, 535, 376, 16, 55, (16 * i + 12), 0, 16, 55);
 }
 
 // upper right corner
-ctx.drawImage( myImgElement, 743, 376, 8, 55, (16 * width + 12), 0, 8, 55);
+ctx.drawImage( myImgElement, 743, 376, 8, 55, (16 * totalColumns + 12), 0, 8, 55);
 // right border
-for(let i = 0; i < height; i++){
-	ctx.drawImage( myImgElement, 743, 431, 8, 16, (16 * width + 12), (16 * i + 55), 8, 16);
+for(let i = 0; i < totalRows; i++){
+	ctx.drawImage( myImgElement, 743, 431, 8, 16, (16 * totalColumns + 12), (16 * i + 55), 8, 16);
 }
 
 // lower right corner
-ctx.drawImage( myImgElement, 743, 687, 8, 8, (16 * width + 12), (16 * height + 55), 8, 8);
+ctx.drawImage( myImgElement, 743, 687, 8, 8, (16 * totalColumns + 12), (16 * totalRows + 55), 8, 8);
 // bottom border
-for(let i = 0; i < width; i++){
-	ctx.drawImage( myImgElement, 727, 687, 16, 8, ((16 * width - 4) - 16 * i), (height * 16 + 55), 16, 8);
+for(let i = 0; i < totalColumns; i++){
+	ctx.drawImage( myImgElement, 727, 687, 16, 8, ((16 * totalColumns - 4) - 16 * i), (totalRows * 16 + 55), 16, 8);
 }
 
 // lower left corner
-ctx.drawImage( myImgElement, 475, 687, 12, 8, 0, (16 * height + 55), 12, 8);
+ctx.drawImage( myImgElement, 475, 687, 12, 8, 0, (16 * totalRows + 55), 12, 8);
 // left border
-for(let i = 0; i < height; i++){
-	ctx.drawImage( myImgElement, 475, 671, 12, 16, 0, ((16 * height + 39) - 16 * i), 12, 16);
+for(let i = 0; i < totalRows; i++){
+	ctx.drawImage( myImgElement, 475, 671, 12, 16, 0, ((16 * totalRows + 39) - 16 * i), 12, 16);
 }
 
 // Mines counter
 ctx.drawImage( myImgElement, 491, 391, 41, 25, 16, 15, 41, 25);
 
 // Time counter
-ctx.drawImage( myImgElement, 491, 391, 41, 25, (16 * (width - 3) + 13), 15, 41, 25);
+ctx.drawImage( myImgElement, 491, 391, 41, 25, (16 * (totalColumns - 3) + 13), 15, 41, 25);
 
 // Face
-ctx.drawImage( myImgElement, 602, 391, 26, 26, (16 * (width >> 1) - 1), 15, 26, 26);
+ctx.drawImage( myImgElement, 602, 391, 26, 26, (16 * (totalColumns >> 1) - 1), 15, 26, 26);
 
 let digitZero = pixelTime.get("0");
 ctx.drawImage( myImgElement, digitZero[0], digitZero[1], 12, 22, 18, 17, 12, 22);
 ctx.drawImage( myImgElement, digitZero[0], digitZero[1], 12, 22, 31, 17, 12, 22);
 ctx.drawImage( myImgElement, digitZero[0], digitZero[1], 12, 22, 44, 17, 12, 22);
 
-ctx.drawImage( myImgElement, digitZero[0], digitZero[1], 12, 22, 16 * (width - 3) + 15, 17, 12, 22);
-ctx.drawImage( myImgElement, digitZero[0], digitZero[1], 12, 22, 16 * (width - 3) + 28, 17, 12, 22);
-ctx.drawImage( myImgElement, digitZero[0], digitZero[1], 12, 22, 16 * (width - 3) + 41, 17, 12, 22);
+ctx.drawImage( myImgElement, digitZero[0], digitZero[1], 12, 22, 16 * (totalColumns - 3) + 15, 17, 12, 22);
+ctx.drawImage( myImgElement, digitZero[0], digitZero[1], 12, 22, 16 * (totalColumns - 3) + 28, 17, 12, 22);
+ctx.drawImage( myImgElement, digitZero[0], digitZero[1], 12, 22, 16 * (totalColumns - 3) + 41, 17, 12, 22);
 
 updateGrid();
 }
@@ -171,10 +168,12 @@ function generateMines(m){
 	}
 }
 
-function calculateValues(m, n){
+// Calculates the values around a mine
+// 3 by 3 squares where mine is in the middle
+function incrementValuesAround(m, n){
 	for(let i = m-1; i <= m + 1; i++){
 		for(let j = n - 1; j <= n + 1; j++){
-			if(i >= 0 && i < width && j >= 0 && j < height){
+			if(i >= 0 && i < totalColumns && j >= 0 && j < totalRows){
 				if(gridValues[i][j] !== 9){
 					gridValues[i][j]++;
 				}
@@ -183,19 +182,19 @@ function calculateValues(m, n){
 	}
 }
 
-function calcAroundMine(){
-	for(let i = 0; i < height; i++){
-		for(let j = 0; j < width; j++){
+function calculateValues(){
+	for(let i = 0; i < totalRows; i++){
+		for(let j = 0; j < totalColumns; j++){
 			if(gridValues[i][j] === 9){
-				calculateValues(i, j);
+				incrementValuesAround(i, j);
 			}
 		}
 	}
 }
 
 function updateGrid(){
-	for(let i = 0; i < height; i++){
-		for(let j = 0; j < width; j++){
+	for(let i = 0; i < totalRows; i++){
+		for(let j = 0; j < totalColumns; j++){
 			let position;
 			if(gridDisplay[i][j] === "hidden"){
 				position = boxImage.get('hidden');
@@ -255,7 +254,7 @@ canvasElem.oncontextmenu = e => {
 };
 
 async function showBoxes(m, n){
-	if(m < 0 || n < 0 || m >= height || n >= width){
+	if(m < 0 || n < 0 || m >= totalRows || n >= totalColumns){
 		return;
 	}
 
@@ -279,8 +278,8 @@ async function showBoxes(m, n){
 }
 
 function showAllMines(){
-	for(let i = 0; i < 10; i++){
-		for(let j = 0; j < 10; j++){
+	for(let i = 0; i < totalRows; i++){
+		for(let j = 0; j < totalColumns; j++){
 			if(gridValues[i][j] === 9 && gridDisplay[i][j] !== "flag"){
 				gridDisplay[i][j] = "shown";
 			}
@@ -289,8 +288,8 @@ function showAllMines(){
 }
 
 function flagAllMines(){
-	for(let i = 0; i < 10; i++){
-		for(let j = 0; j < 10; j++){
+	for(let i = 0; i < totalRows; i++){
+		for(let j = 0; j < totalColumns; j++){
 			if(gridValues[i][j] === 9){
 				gridDisplay[i][j] = "flag";
 			}
@@ -300,8 +299,8 @@ function flagAllMines(){
 }
 
 function showWrongMines() {
-	for(let i = 0; i < 10; i++){
-		for(let j = 0; j < 10; j++){
+	for(let i = 0; i < totalRows; i++){
+		for(let j = 0; j < totalColumns; j++){
 			if(gridDisplay[i][j] === "flag" && gridValues[i][j] !== 9){
 				gridValues[i][j] = 11;
 				gridDisplay[i][j] = "shown";
@@ -320,11 +319,10 @@ canvasElem.addEventListener("mousedown", async e => {
 	let y = e.clientY - rect.top;
 	
 	let row = Math.floor((y - 55)/16);
-	let col = Math.floor((x - 12)/16);	console.log(x, y);
-	
+	let col = Math.floor((x - 12)/16);
 
-	if(16 * (width >> 1) - 1 <= x && x <= 16 * (width >> 1) + 25 && 15 <= y && y <= 41){
-		ctx.drawImage( myImgElement, 39, 170, 24, 24, 16 * (width >> 1), 16, 24, 24);
+	if(16 * (totalColumns >> 1) - 1 <= x && x <= 16 * (totalColumns >> 1) + 25 && 15 <= y && y <= 41){
+		ctx.drawImage( myImgElement, 39, 170, 24, 24, 16 * (totalColumns >> 1), 16, 24, 24);
 	}
 
 	if(12 <= x && 55 <= y && x <= 169 && y <= 215){
@@ -336,10 +334,10 @@ canvasElem.addEventListener("mousedown", async e => {
 
 			if(gridDisplay[row][col] === "flag"){
 				gridDisplay[row][col] = "hidden";
-				numFlag--;
+				numberOfFlags--;
 			}else if(gridDisplay[row][col] === "hidden"){
 				gridDisplay[row][col] = "flag"
-				numFlag++;
+				numberOfFlags++;
 			}
 			updateGuess();
 			updateGrid();
@@ -363,8 +361,8 @@ canvasElem.addEventListener("mouseup", async e => {
 	let x = e.clientX - rect.left;
 	let y = e.clientY - rect.top;
 	
-	if(16 * (width >> 1) - 1 <= x && x <= 16 * (width >> 1) + 25 && 15 <= y && y <= 41){
-		ctx.drawImage( myImgElement, 14, 170, 24, 24, 16 * (width >> 1), 16, 24, 24);
+	if(16 * (totalColumns >> 1) - 1 <= x && x <= 16 * (totalColumns >> 1) + 25 && 15 <= y && y <= 41){
+		ctx.drawImage( myImgElement, 14, 170, 24, 24, 16 * (totalColumns >> 1), 16, 24, 24);
 		resetGame();
 	}
 
@@ -383,8 +381,8 @@ canvasElem.addEventListener("mouseup", async e => {
 	if(e.button === 0){
 
 		if( gameStatus === "notStarted"){
-			for(let i = 0; i < 10; i++){
-				for(let j = 0; j < 10;j++){
+			for(let i = 0; i < totalRows; i++){
+				for(let j = 0; j < totalColumns;j++){
 					if(!(row === i && col === j)){
 						nonMineCoord.push([i, j]);
 					}
@@ -392,10 +390,10 @@ canvasElem.addEventListener("mouseup", async e => {
 			}
 
 			generateMines(10);
-			numMines = 10;
+			totalMines = 10;
 			updateGuess();
 
-			calcAroundMine();
+			calculateValues();
 			startTime = new Date().getTime();
 			gameStatus = "started";
 			timer();
@@ -413,15 +411,15 @@ canvasElem.addEventListener("mouseup", async e => {
 
 		await sleep(10);
 		let count = 0;
-		for(let i = 0; i < 10; i++){
-			for( let j = 0; j < 10; j++){
+		for(let i = 0; i < totalRows; i++){
+			for( let j = 0; j < totalColumns; j++){
 				if(gridDisplay[i][j] === "hidden" || gridDisplay[i][j] === "flag"){
 					count++;
 				}
 			}
 		}
 		await sleep(10);
-		if(count === numMines){
+		if(count === totalMines){
 			gameStatus = "gameWon";
 			console.log("win")
 			flagAllMines();
@@ -450,23 +448,23 @@ document.addEventListener('mousemove', e => {
 		let row = Math.floor((y - 55)/16);
 		let col = Math.floor((x - 12)/16);
 
-		if(16 * (width >> 1) - 1 <= x && x <= 16 * (width) + 25 && 15 <= y && y <= 41){
-			ctx.drawImage( myImgElement, 39, 170, 24, 24, 16 * (width >> 1), 16, 24, 24);
+		if(16 * (totalColumns >> 1) - 1 <= x && x <= 16 * (totalColumns) + 25 && 15 <= y && y <= 41){
+			ctx.drawImage( myImgElement, 39, 170, 24, 24, 16 * (totalColumns >> 1), 16, 24, 24);
 		}else {
-			ctx.drawImage( myImgElement, 14, 170, 24, 24, 16 * (width >> 1), 16, 24, 24);
+			ctx.drawImage( myImgElement, 14, 170, 24, 24, 16 * (totalColumns >> 1), 16, 24, 24);
 		}
 
-		if(12 <= x && 55 <= y && x <= 169 && y <= 215){
+		if(12 <= x && x <= 169 && 55 <= y && y <= 215){
 			if(gridDisplay[row][col] === "hidden"){
 				if(prevRow !== row || prevCol !== col){
 			
 					if( prevRow !== -1 && prevCol !== -1 && gridDisplay[prevRow][prevCol] !== "shown") {
 						let position = boxImage.get("hidden");
-						ctx.drawImage( myImgElement, position[0], position[1], 16, 16, prevCol*16 + 12, prevRow*16 + 55, 16, 16);
+						ctx.drawImage( myImgElement, position[0], position[1], 16, 16, 16 * prevCol + 12, 16 * prevRow + 55, 16, 16);
 					}
 
 					position = boxImage.get("blank");
-					ctx.drawImage( myImgElement, position[0], position[1], 16, 16, col*16 + 12, row*16 + 55, 16, 16);
+					ctx.drawImage( myImgElement, position[0], position[1], 16, 16, 16 * col + 12, 16 * row + 55, 16, 16);
 					
 					prevRow = row;
 					prevCol = col;
@@ -494,11 +492,11 @@ function updateTime(seconds){
 	let position = 0;
 
 	position = pixelTime.get(secStr[0]);
-	ctx.drawImage( myImgElement, position[0], position[1], 12, 22, 16 * (width - 3) + 15, 17, 12, 22);
+	ctx.drawImage( myImgElement, position[0], position[1], 12, 22, 16 * (totalColumns - 3) + 15, 17, 12, 22);
 	position = pixelTime.get(secStr[1]);
-	ctx.drawImage( myImgElement, position[0], position[1], 12, 22, 16 * (width - 3) + 28, 17, 12, 22);
+	ctx.drawImage( myImgElement, position[0], position[1], 12, 22, 16 * (totalColumns - 3) + 28, 17, 12, 22);
 	position = pixelTime.get(secStr[2]);
-	ctx.drawImage( myImgElement, position[0], position[1], 12, 22, 16 * (width - 3) + 41, 17, 12, 22);
+	ctx.drawImage( myImgElement, position[0], position[1], 12, 22, 16 * (totalColumns - 3) + 41, 17, 12, 22);
 }
 
 function updateGuess(){
@@ -506,15 +504,15 @@ function updateGuess(){
 
 	
 	let position;
-	let diffGuess = numMines - numFlag;
+	let diffGuess = totalMines - numberOfFlags;
 
-	if(numMines - numFlag < 0){
-		diffGuess = Math.abs(numMines - numFlag);
+	if(totalMines - numberOfFlags < 0){
+		diffGuess = Math.abs(totalMines - numberOfFlags);
 	}
 
 	guessStr = diffGuess.toString().padStart(3, "0");
 
-	if(numMines - numFlag < 0){
+	if(totalMines - numberOfFlags < 0){
 		position = pixelTime.get("-");
 	} else {
 		position = pixelTime.get(guessStr[0]);
@@ -528,15 +526,15 @@ function updateGuess(){
 }
 
 function resetGame() {
-	for(let i = 0; i < height; i++){
-		for(let j = 0; j < width; j++){
+	for(let i = 0; i < totalRows; i++){
+		for(let j = 0; j < totalColumns; j++){
 			gridValues[i][j] = 0;
 			gridDisplay[i][j] = "hidden";
 		}
 	}
 	gameStatus = "notStarted";
-	numMines = 0;
-	numFlag = 0;
+	totalMines = 0;
+	numberOfFlags = 0;
 
 	updateGrid();
 	updateGuess();
@@ -546,14 +544,6 @@ function resetGame() {
 let isMenuOpen = false;
 const dropdown = document.getElementById("dropdown-content");
 const gameMenu = document.getElementById("game-menu");
-
-function handleGameMenu(){
-	if( dropdown.className === "dropdown-content-hidden" ) {
-		openGameMenu();
-	} else {
-		closeGameMenu();
-	}
-}
 
 function openGameMenu() {
 	dropdown.className = "dropdown-content-shown";
@@ -565,6 +555,14 @@ function closeGameMenu() {
 	dropdown.className = "dropdown-content-hidden";
 	gameMenu.className = "none-background";
 	isMenuOpen = false;
+}
+
+function handleGameMenu(){
+	if( dropdown.className === "dropdown-content-hidden" ) {
+		openGameMenu();
+	} else {
+		closeGameMenu();
+	}
 }
 
 function handleNewClicked() {
@@ -598,27 +596,10 @@ function setCheckedBox(difficulty) {
 	checkBox[i].className = "checked-box";
 }
 
-function handleBeginnerClicked() {
+function handleDifficulty(difficulty) {
 	closeGameMenu();
 	hideCheck();
-	setCheckedBox("beginner");
-	setupCanvas("beginner");
-	resetGame();
-}
-
-
-function handleIntermediateClicked() {
-	closeGameMenu();
-	hideCheck();
-	setCheckedBox("intermediate");
-	setupCanvas("intermediate");
-	resetGame();
-}
-
-function handleExpertClicked() {
-	closeGameMenu();
-	hideCheck();
-	setCheckedBox("expert");
-	setupCanvas("expert");
+	setCheckedBox(difficulty);
+	setupCanvas(difficulty);
 	resetGame();
 }
