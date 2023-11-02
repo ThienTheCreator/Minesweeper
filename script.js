@@ -2,7 +2,7 @@ let totalColumns = 10;
 let totalRows = 10;
 let gameStatus = "notStarted";
 let startTime = -1;
-let totalMines = 0;
+let totalMines = 10;
 let numberOfFlags = 0;
 
 // false to not display true to display grid value
@@ -57,61 +57,70 @@ canvas.height = 16 * totalRows + 63;
 // canvas.fillStyle = "rgba("+r+","+g+","+b+","+(a/255)+")";
 // canvas.fillRect( 1, 1, 1, 1 );
 
+class Sprite {
+	// sx and sy is the top left corner of sub-rectangle of source
+	constructor(sx, sy, sWidth, sHeight) {
+		this.sx = sx;
+		this.sy = sy;
+		this.width = width;
+		this.height = height;
+	}
+}
+
+// TODO
+function drawSprite(sprite, dx, dy){
 
 // drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
-// empty box
+// draw empty square at top left corner
 // Example: ctx.drawImage( myImgElement, 14, 195, 16, 16, 0, 0, 16, 16);
+
+}
+
 
 ctx.imageSmoothingEnabled = false;
 
-// upper left corner
+// top left corner
 ctx.drawImage( myImgElement, 475, 376, 12, 55, 0, 0, 12, 55);
 // top border
 for(let i = 0; i < totalColumns; i ++){
 	ctx.drawImage( myImgElement, 535, 376, 16, 55, (16 * i + 12), 0, 16, 55);
 }
 
-// upper right corner
+// top right corner
 ctx.drawImage( myImgElement, 743, 376, 8, 55, (16 * totalColumns + 12), 0, 8, 55);
 // right border
 for(let i = 0; i < totalRows; i++){
 	ctx.drawImage( myImgElement, 743, 431, 8, 16, (16 * totalColumns + 12), (16 * i + 55), 8, 16);
 }
 
-// lower right corner
+// bottom right corner
 ctx.drawImage( myImgElement, 743, 687, 8, 8, (16 * totalColumns + 12), (16 * totalRows + 55), 8, 8);
 // bottom border
 for(let i = 0; i < totalColumns; i++){
 	ctx.drawImage( myImgElement, 727, 687, 16, 8, ((16 * totalColumns - 4) - 16 * i), (totalRows * 16 + 55), 16, 8);
 }
 
-// lower left corner
+// bottom left corner
 ctx.drawImage( myImgElement, 475, 687, 12, 8, 0, (16 * totalRows + 55), 12, 8);
 // left border
 for(let i = 0; i < totalRows; i++){
 	ctx.drawImage( myImgElement, 475, 671, 12, 16, 0, ((16 * totalRows + 39) - 16 * i), 12, 16);
 }
 
-// Mines counter
+// Mines counter background
 ctx.drawImage( myImgElement, 491, 391, 41, 25, 16, 15, 41, 25);
 
-// Time counter
+// Time counter background
 ctx.drawImage( myImgElement, 491, 391, 41, 25, (16 * (totalColumns - 3) + 13), 15, 41, 25);
 
 // Face
 ctx.drawImage( myImgElement, 602, 391, 26, 26, (16 * (totalColumns >> 1) - 1), 15, 26, 26);
 
-let digitZero = pixelTime.get("0");
-ctx.drawImage( myImgElement, digitZero[0], digitZero[1], 12, 22, 18, 17, 12, 22);
-ctx.drawImage( myImgElement, digitZero[0], digitZero[1], 12, 22, 31, 17, 12, 22);
-ctx.drawImage( myImgElement, digitZero[0], digitZero[1], 12, 22, 44, 17, 12, 22);
-
-ctx.drawImage( myImgElement, digitZero[0], digitZero[1], 12, 22, 16 * (totalColumns - 3) + 15, 17, 12, 22);
-ctx.drawImage( myImgElement, digitZero[0], digitZero[1], 12, 22, 16 * (totalColumns - 3) + 28, 17, 12, 22);
-ctx.drawImage( myImgElement, digitZero[0], digitZero[1], 12, 22, 16 * (totalColumns - 3) + 41, 17, 12, 22);
-
 updateGrid();
+updateGuess();
+updateTime(0);
 }
+
 
 async function setup() {
 	await sleep(10);
@@ -150,7 +159,7 @@ setupCanvas("beginner");
 
 setup();
 
-function addRandomMine(){
+async function addRandomMine(){
 	let randomIndex = Math.floor(Math.random() * nonMineCoord.length);
 	let position = nonMineCoord[randomIndex];
 
@@ -161,6 +170,7 @@ function addRandomMine(){
 	nonMineCoord.splice(randomIndex, 1);
 }
 
+let tempMines = 0;
 // m is the number of mines
 function generateMines(m){
 	for(let i = 0; i < m; i++){
@@ -170,10 +180,10 @@ function generateMines(m){
 
 // Calculates the values around a mine
 // 3 by 3 squares where mine is in the middle
-function incrementValuesAround(m, n){
-	for(let i = m-1; i <= m + 1; i++){
-		for(let j = n - 1; j <= n + 1; j++){
-			if(i >= 0 && i < totalColumns && j >= 0 && j < totalRows){
+function incrementValuesAround(row, col){
+	for(let i = row-1; i <= row + 1; i++){
+		for(let j = col - 1; j <= col + 1; j++){
+			if(i >= 0 && i < totalRows && j >= 0 && j < totalColumns){
 				if(gridValues[i][j] !== 9){
 					gridValues[i][j]++;
 				}
@@ -253,20 +263,20 @@ canvasElem.oncontextmenu = e => {
 	e.stopPropagation();
 };
 
-async function showBoxes(m, n){
-	if(m < 0 || n < 0 || m >= totalRows || n >= totalColumns){
+async function showBoxes(row, col){
+	if(row < 0 || col < 0 || row >= totalRows || col >= totalColumns){
 		return;
 	}
 
-	if(gridDisplay[m][n] === "flag"){
+	if(gridDisplay[row][col] === "flag"){
 		return;
 	}
 
-	if(gridDisplay[m][n] !== "" && gridValues[m][n] === 0){
-		gridDisplay[m][n] = "";
-		for(let i = m - 1; i <= m + 1; i++){
-			for(let j = n - 1; j <= n + 1; j++){
-				if(i !== m || j !== n){
+	if(gridDisplay[row][col] !== "" && gridValues[row][col] === 0){
+		gridDisplay[row][col] = "";
+		for(let i = row - 1; i <= row + 1; i++){
+			for(let j = col - 1; j <= col + 1; j++){
+				if(i !== row || j !== col){
 					showBoxes(i, j);
 				}
 			}
@@ -274,7 +284,7 @@ async function showBoxes(m, n){
 	}
 
 	await sleep(1);
-	gridDisplay[m][n] = "shown";
+	gridDisplay[row][col] = "shown";
 }
 
 function showAllMines(){
@@ -295,7 +305,7 @@ function flagAllMines(){
 			}
 		}
 	}
-	
+	numberOfFlags = totalMines
 }
 
 function showWrongMines() {
@@ -318,18 +328,22 @@ canvasElem.addEventListener("mousedown", async e => {
 	let x = e.clientX - rect.left;
 	let y = e.clientY - rect.top;
 	
-	let row = Math.floor((y - 55)/16);
-	let col = Math.floor((x - 12)/16);
+	let row = Math.floor((y - 55) / 16);
+	let col = Math.floor((x - 12) / 16);
 
 	if(16 * (totalColumns >> 1) - 1 <= x && x <= 16 * (totalColumns >> 1) + 25 && 15 <= y && y <= 41){
 		ctx.drawImage( myImgElement, 39, 170, 24, 24, 16 * (totalColumns >> 1), 16, 24, 24);
 	}
 
-	if(12 <= x && 55 <= y && x <= 169 && y <= 215){
-	
+	if(gameStatus === "gameOver" || gameStatus === "gameWon")
+		return;
+
+	// check for pixels boundaries for squares
+	if(11 <= x && x <= 16 * totalColumns + 11 && 55 <= y && y <= 16 * totalRows + 55) {
+
 		// right click
 		if(e.button === 2){
-			if (gameStatus === "notStarted")
+			if (gameStatus === "notStarted" || gameStatus === "gameWon")
 				return;
 
 			if(gridDisplay[row][col] === "flag"){
@@ -339,11 +353,13 @@ canvasElem.addEventListener("mousedown", async e => {
 				gridDisplay[row][col] = "flag"
 				numberOfFlags++;
 			}
+
 			updateGuess();
 			updateGrid();
 			return;
 		}
 
+		// assume left click
 		if(gridDisplay[row][col] === "hidden"){
 			let position = boxImage.get("blank");
 			ctx.drawImage( myImgElement, position[0], position[1], 16, 16, 16 * col + 12, 16 * row + 55, 16, 16);
@@ -371,7 +387,7 @@ canvasElem.addEventListener("mouseup", async e => {
 		return;
 	}
 
-	if(x < 12 || y < 55 || x > 169 || y > 215)
+	if(x < 11 || 16 * totalColumns + 11 < x || y < 55 || 16 * totalRows + 55 < y)
 		return;
 
 	let row = Math.floor((y - 55)/16);
@@ -389,8 +405,7 @@ canvasElem.addEventListener("mouseup", async e => {
 				}
 			}
 
-			generateMines(10);
-			totalMines = 10;
+			generateMines(totalMines);
 			updateGuess();
 
 			calculateValues();
@@ -409,7 +424,7 @@ canvasElem.addEventListener("mouseup", async e => {
 			showBoxes(row, col);
 		}
 
-		await sleep(10);
+		await sleep(1);
 		let count = 0;
 		for(let i = 0; i < totalRows; i++){
 			for( let j = 0; j < totalColumns; j++){
@@ -418,11 +433,12 @@ canvasElem.addEventListener("mouseup", async e => {
 				}
 			}
 		}
-		await sleep(10);
+
+		await sleep(1);
 		if(count === totalMines){
 			gameStatus = "gameWon";
-			console.log("win")
 			flagAllMines();
+			updateGuess();
 		}
 	}
 
@@ -432,8 +448,7 @@ canvasElem.addEventListener("mouseup", async e => {
 
 let prevRow = -1;
 let prevCol = -1;
-let row = 0;
-let col = 0;
+
 document.addEventListener('mousemove', e => {
 	if( e.buttons === 0 || e.buttons === 2)
 		return
@@ -454,7 +469,10 @@ document.addEventListener('mousemove', e => {
 			ctx.drawImage( myImgElement, 14, 170, 24, 24, 16 * (totalColumns >> 1), 16, 24, 24);
 		}
 
-		if(12 <= x && x <= 169 && 55 <= y && y <= 215){
+		if(gameStatus === "gameOver" || gameStatus === "gameWon")
+			return;
+
+		if(11 <= x && x <= 16 * totalColumns + 11 && 55 <= y && y <= 16 * totalRows + 55){
 			if(gridDisplay[row][col] === "hidden"){
 				if(prevRow !== row || prevCol !== col){
 			
@@ -486,6 +504,7 @@ async function timer() {
 	}
 }
 
+// takes an Integer as seconds
 function updateTime(seconds){
 	let secStr = seconds.toString().padStart(3, "0");
 
@@ -502,7 +521,6 @@ function updateTime(seconds){
 function updateGuess(){
 	let guessStr;
 
-	
 	let position;
 	let diffGuess = totalMines - numberOfFlags;
 
@@ -533,8 +551,9 @@ function resetGame() {
 		}
 	}
 	gameStatus = "notStarted";
-	totalMines = 0;
 	numberOfFlags = 0;
+
+	nonMineCoord = [];
 
 	updateGrid();
 	updateGuess();
