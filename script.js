@@ -19,9 +19,66 @@ let canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 const myImgElement = document.getElementById("myImag");
 
-let boxImage = new Map();
+class Sprite {
+	// sx and sy is the top left corner of sub-rectangle of source
+	constructor(sx, sy, sWidth, sHeight) {
+		this.sx = sx;
+		this.sy = sy;
+		this.width = sWidth;
+		this.height = sHeight;
+	}
+}
 
-let pixelTime = new Map();
+let spriteMap = new Map();
+
+function setupSpriteMap() {
+	spriteMap.set("hidden"   , new Sprite( 14, 195, 16, 16));
+	spriteMap.set("blank"    , new Sprite( 31, 195, 16, 16));
+	spriteMap.set("flag"     , new Sprite( 48, 195, 16, 16));
+	spriteMap.set("mine"     , new Sprite( 99, 195, 16, 16));
+	spriteMap.set("wrongMine", new Sprite(116, 195, 16, 16));
+	spriteMap.set("notMine"  , new Sprite(133, 195, 16, 16));
+	spriteMap.set("square1"  , new Sprite( 14, 212, 16, 16));
+	spriteMap.set("square2"  , new Sprite( 31, 212, 16, 16));
+	spriteMap.set("square3"  , new Sprite( 48, 212, 16, 16));
+	spriteMap.set("square4"  , new Sprite( 65, 212, 16, 16));
+	spriteMap.set("square5"  , new Sprite( 82, 212, 16, 16));
+	spriteMap.set("square6"  , new Sprite( 99, 212, 16, 16));
+	spriteMap.set("square7"  , new Sprite(116, 212, 16, 16));
+	spriteMap.set("square8"  , new Sprite(133, 212, 16, 16));
+
+	spriteMap.set("red1", new Sprite( 15, 147, 12, 22));
+	spriteMap.set("red2", new Sprite( 29, 147, 12, 22));
+	spriteMap.set("red3", new Sprite( 43, 147, 12, 22));
+	spriteMap.set("red4", new Sprite( 57, 147, 12, 22));
+	spriteMap.set("red5", new Sprite( 71, 147, 12, 22));
+	spriteMap.set("red6", new Sprite( 85, 147, 12, 22));
+	spriteMap.set("red7", new Sprite( 99, 147, 12, 22));
+	spriteMap.set("red8", new Sprite(113, 147, 12, 22));
+	spriteMap.set("red9", new Sprite(127, 147, 12, 22));
+	spriteMap.set("red0", new Sprite(141, 147, 12, 22));
+	spriteMap.set("red-", new Sprite(155, 147, 12, 22));
+
+	spriteMap.set("happy",    new Sprite( 14, 170, 24, 24));
+	spriteMap.set("clicked" , new Sprite( 39, 170, 24, 24));
+	spriteMap.set("suspense", new Sprite( 64, 170, 24, 24));
+	spriteMap.set("cool",     new Sprite( 89, 170, 24, 24));
+	spriteMap.set("dead",     new Sprite(114, 170, 24, 24));
+}
+setupSpriteMap();
+
+function drawSprite(spriteName, dx, dy){
+
+// drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
+// draw empty square at top left corner
+// Example: ctx.drawImage( myImgElement, 14, 195, 16, 16, 0, 0, 16, 16);
+
+	let sprite = spriteMap.get(spriteName);
+	ctx.drawImage(myImgElement, 
+		sprite.sx, sprite.sy, sprite.width, sprite.height, 
+				   dx,        dy, sprite.width, sprite.height);
+}
+
 
 function setupCanvas(difficulty){
 
@@ -54,67 +111,44 @@ ctx.imageSmoothingEnabled = false;
 canvas.width = 16 * totalColumns + 20;
 canvas.height = 16 * totalRows + 63;
 
-// canvas.fillStyle = "rgba("+r+","+g+","+b+","+(a/255)+")";
-// canvas.fillRect( 1, 1, 1, 1 );
-
-class Sprite {
-	// sx and sy is the top left corner of sub-rectangle of source
-	constructor(sx, sy, sWidth, sHeight) {
-		this.sx = sx;
-		this.sy = sy;
-		this.width = width;
-		this.height = height;
-	}
-}
-
-// TODO
-function drawSprite(sprite, dx, dy){
-
-// drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
-// draw empty square at top left corner
-// Example: ctx.drawImage( myImgElement, 14, 195, 16, 16, 0, 0, 16, 16);
-
-}
-
-
 ctx.imageSmoothingEnabled = false;
 
 // top left corner
 ctx.drawImage( myImgElement, 475, 376, 12, 55, 0, 0, 12, 55);
 // top border
 for(let i = 0; i < totalColumns; i ++){
-	ctx.drawImage( myImgElement, 535, 376, 16, 55, (16 * i + 12), 0, 16, 55);
+	ctx.drawImage( myImgElement, 535, 376, 16, 55, (16*i + 12), 0, 16, 55);
 }
 
 // top right corner
-ctx.drawImage( myImgElement, 743, 376, 8, 55, (16 * totalColumns + 12), 0, 8, 55);
+ctx.drawImage( myImgElement, 743, 376, 8, 55, (16*totalColumns + 12), 0, 8, 55);
 // right border
 for(let i = 0; i < totalRows; i++){
-	ctx.drawImage( myImgElement, 743, 431, 8, 16, (16 * totalColumns + 12), (16 * i + 55), 8, 16);
+	ctx.drawImage( myImgElement, 743, 431, 8, 16, (16*totalColumns + 12), (16*i + 55), 8, 16);
 }
 
 // bottom right corner
-ctx.drawImage( myImgElement, 743, 687, 8, 8, (16 * totalColumns + 12), (16 * totalRows + 55), 8, 8);
+ctx.drawImage( myImgElement, 743, 687, 8, 8, (16*totalColumns + 12), (16*totalRows + 55), 8, 8);
 // bottom border
 for(let i = 0; i < totalColumns; i++){
-	ctx.drawImage( myImgElement, 727, 687, 16, 8, ((16 * totalColumns - 4) - 16 * i), (totalRows * 16 + 55), 16, 8);
+	ctx.drawImage( myImgElement, 727, 687, 16, 8, ((16*totalColumns - 4) - 16 * i), (16*totalRows + 55), 16, 8);
 }
 
 // bottom left corner
-ctx.drawImage( myImgElement, 475, 687, 12, 8, 0, (16 * totalRows + 55), 12, 8);
+ctx.drawImage( myImgElement, 475, 687, 12, 8, 0, (16*totalRows + 55), 12, 8);
 // left border
 for(let i = 0; i < totalRows; i++){
-	ctx.drawImage( myImgElement, 475, 671, 12, 16, 0, ((16 * totalRows + 39) - 16 * i), 12, 16);
+	ctx.drawImage( myImgElement, 475, 671, 12, 16, 0, ((16*totalRows + 39) - 16*i), 12, 16);
 }
 
 // Mines counter background
 ctx.drawImage( myImgElement, 491, 391, 41, 25, 16, 15, 41, 25);
 
 // Time counter background
-ctx.drawImage( myImgElement, 491, 391, 41, 25, (16 * (totalColumns - 3) + 13), 15, 41, 25);
+ctx.drawImage( myImgElement, 491, 391, 41, 25, (16*(totalColumns - 3) + 13), 15, 41, 25);
 
 // Face
-ctx.drawImage( myImgElement, 602, 391, 26, 26, (16 * (totalColumns >> 1) - 1), 15, 26, 26);
+ctx.drawImage( myImgElement, 602, 391, 26, 26, (8*totalColumns - 1), 15, 26, 26);
 
 updateGrid();
 updateGuess();
@@ -124,37 +158,9 @@ updateTime(0);
 
 async function setup() {
 	await sleep(10);
-
-// positions for the image boxes
-boxImage.set('hidden', [14, 195]);
-boxImage.set('blank', [31, 195]);
-boxImage.set('flag', [48, 195]);
-boxImage.set('mine', [99, 195]);
-boxImage.set('wrongMine', [116, 195]);
-boxImage.set('notMine', [133, 195]);
-boxImage.set('1', [14, 212]);
-boxImage.set('2', [31, 212]);
-boxImage.set('3', [48, 212]);
-boxImage.set('4', [65, 212]);
-boxImage.set('5', [82, 212]);
-boxImage.set('6', [99, 212]);
-boxImage.set('7', [116, 212]);
-boxImage.set('8', [133, 212]);
-
-pixelTime.set("1", [15, 147]);
-pixelTime.set("2", [29, 147]);
-pixelTime.set("3", [43, 147]);
-pixelTime.set("4", [57, 147]);
-pixelTime.set("5", [71, 147]);
-pixelTime.set("6", [85, 147]);
-pixelTime.set("7", [99, 147]);
-pixelTime.set("8", [113, 147]);
-pixelTime.set("9", [127, 147]);
-pixelTime.set("0", [141, 147]);
-pixelTime.set("-", [155, 147]);
-pixelTime.set(" ", [169, 147]);
-
-setupCanvas("beginner");
+	setupSpriteMap();
+	setupCanvas("beginner");
+	changeFace("happy");
 }
 
 setup();
@@ -205,52 +211,26 @@ function calculateValues(){
 function updateGrid(){
 	for(let i = 0; i < totalRows; i++){
 		for(let j = 0; j < totalColumns; j++){
-			let position;
-			if(gridDisplay[i][j] === "hidden"){
-				position = boxImage.get('hidden');
-			}else if(gridDisplay[i][j] === "flag"){
-				position = boxImage.get('flag');
-			}else{
-				switch(gridValues[i][j]){
-					case 0:
-						position = boxImage.get('blank');
-						break;
-					case 1:
-						position = boxImage.get('1');
-						break;
-					case 2:
-						position = boxImage.get('2');
-						break;
-					case 3:
-						position = boxImage.get('3');
-						break;
-					case 4:
-						position = boxImage.get('4');
-						break;
-					case 5:
-						position = boxImage.get('5');
-						break;
-					case 6:
-						position = boxImage.get('6');
-						break;
-					case 7:
-						position = boxImage.get('7');
-						break;
-					case 8:
-						position = boxImage.get('8');
-						break;
-					case 9:
-						position = boxImage.get('mine');
-						break;
-					case 10: 
-						position = boxImage.get('wrongMine');
-						break;
-					case 11:
-						position = boxImage.get('notMine');
-						break;
+			if(gridDisplay[i][j] === "hidden" || gridDisplay[i][j] === "flag"){
+				drawSprite(gridDisplay[i][j], 16*j + 12, 16*i + 55);
+			} else {
+				let spriteName = "blank";
+
+				if(1 <= gridValues[i][j] && gridValues[i][j] <= 8){
+					spriteName = "square" + gridValues[i][j];
 				}
+
+				if(gridValues[i][j] === 9)
+					spriteName = "mine";
+
+				if(gridValues[i][j] === 10)
+					spriteName = "wrongMine";
+
+				if(gridValues[i][j] === 11)
+					spriteName = "notMine";
+
+				drawSprite(spriteName, 16*j + 12, 16*i + 55);
 			}
-			ctx.drawImage( myImgElement, position[0], position[1], 16, 16, j*16 + 12, i*16 + 55, 16, 16);
 		}
 	}
 }
@@ -319,8 +299,11 @@ function showWrongMines() {
 	}
 }
 
-let isHold = false;
+function changeFace(faceType) {
+	drawSprite(faceType, 16*(totalColumns >> 1), 16);
+}
 
+let isHold = false;
 canvasElem.addEventListener("mousedown", async e => {
 	isHold = true;
 
@@ -331,8 +314,14 @@ canvasElem.addEventListener("mousedown", async e => {
 	let row = Math.floor((y - 55) / 16);
 	let col = Math.floor((x - 12) / 16);
 
-	if(16 * (totalColumns >> 1) - 1 <= x && x <= 16 * (totalColumns >> 1) + 25 && 15 <= y && y <= 41){
-		ctx.drawImage( myImgElement, 39, 170, 24, 24, 16 * (totalColumns >> 1), 16, 24, 24);
+	let leftBound = 16 * (totalColumns >> 1) - 1;
+	let rightBound = 16 * (totalColumns >> 1) + 25;  
+	let topBound = 15;
+	let bottomBound = 41;
+
+	// face boundaries
+	if(leftBound <= x && x <= rightBound && topBound <= y && y <= bottomBound){
+		changeFace("clicked")	
 	}
 
 	if(gameStatus === "gameOver" || gameStatus === "gameWon")
@@ -341,6 +330,7 @@ canvasElem.addEventListener("mousedown", async e => {
 	// check for pixels boundaries for squares
 	if(11 <= x && x <= 16 * totalColumns + 11 && 55 <= y && y <= 16 * totalRows + 55) {
 
+		changeFace("suspense");
 		// right click
 		if(e.button === 2){
 			if (gameStatus === "notStarted" || gameStatus === "gameWon")
@@ -361,8 +351,7 @@ canvasElem.addEventListener("mousedown", async e => {
 
 		// assume left click
 		if(gridDisplay[row][col] === "hidden"){
-			let position = boxImage.get("blank");
-			ctx.drawImage( myImgElement, position[0], position[1], 16, 16, 16 * col + 12, 16 * row + 55, 16, 16);
+			drawSprite("blank", 16*col + 12, 16*row + 55);
 		}
 	}
 
@@ -376,9 +365,15 @@ canvasElem.addEventListener("mouseup", async e => {
 	let rect = canvas.getBoundingClientRect();
 	let x = e.clientX - rect.left;
 	let y = e.clientY - rect.top;
-	
-	if(16 * (totalColumns >> 1) - 1 <= x && x <= 16 * (totalColumns >> 1) + 25 && 15 <= y && y <= 41){
-		ctx.drawImage( myImgElement, 14, 170, 24, 24, 16 * (totalColumns >> 1), 16, 24, 24);
+
+	let leftBound = 16 * (totalColumns >> 1) - 1;
+	let rightBound = 16 * (totalColumns >> 1) + 25;  
+	let topBound = 15;
+	let bottomBound = 41;
+
+	// face boundaries
+	if( leftBound <= x && x <= rightBound && topBound <= y && y <= bottomBound){
+		changeFace("happy");
 		resetGame();
 	}
 
@@ -418,6 +413,7 @@ canvasElem.addEventListener("mouseup", async e => {
 			if(gridValues[row][col] == 9){
 				gridValues[row][col] = 10;
 				gameStatus = "gameOver";
+				changeFace("dead");
 				showAllMines();
 				showWrongMines();
 			}
@@ -437,6 +433,7 @@ canvasElem.addEventListener("mouseup", async e => {
 		await sleep(1);
 		if(count === totalMines){
 			gameStatus = "gameWon";
+			changeFace("cool");
 			flagAllMines();
 			updateGuess();
 		}
@@ -463,26 +460,24 @@ document.addEventListener('mousemove', e => {
 		let row = Math.floor((y - 55)/16);
 		let col = Math.floor((x - 12)/16);
 
-		if(16 * (totalColumns >> 1) - 1 <= x && x <= 16 * (totalColumns) + 25 && 15 <= y && y <= 41){
-			ctx.drawImage( myImgElement, 39, 170, 24, 24, 16 * (totalColumns >> 1), 16, 24, 24);
+		if(8 * (totalColumns) - 1 <= x && x <= 8 * (totalColumns) + 25 && 15 <= y && y <= 41){
+			changeFace("clicked");
 		}else {
-			ctx.drawImage( myImgElement, 14, 170, 24, 24, 16 * (totalColumns >> 1), 16, 24, 24);
+			changeFace("happy");
 		}
 
 		if(gameStatus === "gameOver" || gameStatus === "gameWon")
 			return;
 
-		if(11 <= x && x <= 16 * totalColumns + 11 && 55 <= y && y <= 16 * totalRows + 55){
+		if(0 <= row && row < totalRows && 0 <= col && col < totalColumns){
 			if(gridDisplay[row][col] === "hidden"){
 				if(prevRow !== row || prevCol !== col){
 			
-					if( prevRow !== -1 && prevCol !== -1 && gridDisplay[prevRow][prevCol] !== "shown") {
-						let position = boxImage.get("hidden");
-						ctx.drawImage( myImgElement, position[0], position[1], 16, 16, 16 * prevCol + 12, 16 * prevRow + 55, 16, 16);
+					if( -1 < prevRow && -1 < prevCol && gridDisplay[prevRow][prevCol] !== "shown") {
+						drawSprite("hidden", 16*prevCol + 12, 16*prevRow + 55);
 					}
 
-					position = boxImage.get("blank");
-					ctx.drawImage( myImgElement, position[0], position[1], 16, 16, 16 * col + 12, 16 * row + 55, 16, 16);
+					drawSprite("blank", 16*col + 12, 16*row + 55);
 					
 					prevRow = row;
 					prevCol = col;
@@ -490,8 +485,13 @@ document.addEventListener('mousemove', e => {
 				}
 					
 			}
+		} else {
+			if(-1 < prevRow && -1 < prevCol){
+				drawSprite("hidden", 16*prevCol + 12, 16*prevRow + 55);	
+			}
+			prevRow = -1;
+			prevCol = -1;
 		}
-
 	}
 })
 
@@ -508,20 +508,15 @@ async function timer() {
 function updateTime(seconds){
 	let secStr = seconds.toString().padStart(3, "0");
 
-	let position = 0;
-
-	position = pixelTime.get(secStr[0]);
-	ctx.drawImage( myImgElement, position[0], position[1], 12, 22, 16 * (totalColumns - 3) + 15, 17, 12, 22);
-	position = pixelTime.get(secStr[1]);
-	ctx.drawImage( myImgElement, position[0], position[1], 12, 22, 16 * (totalColumns - 3) + 28, 17, 12, 22);
-	position = pixelTime.get(secStr[2]);
-	ctx.drawImage( myImgElement, position[0], position[1], 12, 22, 16 * (totalColumns - 3) + 41, 17, 12, 22);
+	drawSprite("red" + secStr[0], 16 * (totalColumns - 3) + 15, 17);
+	drawSprite("red" + secStr[1], 16 * (totalColumns - 3) + 28, 17);
+	drawSprite("red" + secStr[2], 16 * (totalColumns - 3) + 41, 17);
 }
 
 function updateGuess(){
 	let guessStr;
 
-	let position;
+	let spriteName;
 	let diffGuess = totalMines - numberOfFlags;
 
 	if(totalMines - numberOfFlags < 0){
@@ -531,16 +526,14 @@ function updateGuess(){
 	guessStr = diffGuess.toString().padStart(3, "0");
 
 	if(totalMines - numberOfFlags < 0){
-		position = pixelTime.get("-");
+		spriteName = "red-";
 	} else {
-		position = pixelTime.get(guessStr[0]);
+		spriteName = "red" + guessStr[0];
 	}
 
-	ctx.drawImage( myImgElement, position[0], position[1], 12, 22, 18, 17, 12, 22);
-	position = pixelTime.get(guessStr[1]);
-	ctx.drawImage( myImgElement, position[0], position[1], 12, 22, 31, 17, 12, 22);
-	position = pixelTime.get(guessStr[2]);
-	ctx.drawImage( myImgElement, position[0], position[1], 12, 22, 44, 17, 12, 22);
+	drawSprite(spriteName, 18, 17);
+	drawSprite("red" + guessStr[1], 31, 17);
+	drawSprite("red" + guessStr[2], 44, 17);
 }
 
 function resetGame() {
@@ -577,7 +570,7 @@ function closeGameMenu() {
 }
 
 function handleGameMenu(){
-	if( dropdown.className === "dropdown-content-hidden" ) {
+	if( dropdown.className === "dropdown-content-idden" ) {
 		openGameMenu();
 	} else {
 		closeGameMenu();
