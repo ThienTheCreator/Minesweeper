@@ -12,6 +12,8 @@ let nonMineCoord = [];
 
 let count = 0;
 
+let currentFace = "happy";
+
 const sleep = (ms) => new Promise(res => setTimeout(res, ms));
 
 
@@ -58,6 +60,18 @@ function setupSpriteMap() {
 	spriteMap.set("red9", new Sprite(127, 147, 12, 22));
 	spriteMap.set("red0", new Sprite(141, 147, 12, 22));
 	spriteMap.set("red-", new Sprite(155, 147, 12, 22));
+
+	spriteMap.set("topLeftCorner",     new Sprite(475, 376, 12, 55));
+	spriteMap.set("topBorder",         new Sprite(535, 376, 16, 55));
+	spriteMap.set("topRightCorner",    new Sprite(743, 376,  8, 55));
+	spriteMap.set("rightBorder",       new Sprite(743, 431,  8, 16));
+	spriteMap.set("bottomRightCorner", new Sprite(743, 687,  8,  8));
+	spriteMap.set("bottomBorder",      new Sprite(727, 687, 16,  8));
+	spriteMap.set("bottomLeftCorner",  new Sprite(475, 687, 12,  8));
+	spriteMap.set("leftBorder",        new Sprite(475, 671, 12, 16));
+
+	spriteMap.set("numberBackground", new Sprite(491, 391, 41, 25));
+	spriteMap.set("faceBackground",   new Sprite(602, 391, 26, 26));
 
 	spriteMap.set("happy",    new Sprite( 14, 170, 24, 24));
 	spriteMap.set("clicked" , new Sprite( 39, 170, 24, 24));
@@ -113,42 +127,29 @@ canvas.height = 16 * totalRows + 63;
 
 ctx.imageSmoothingEnabled = false;
 
-// top left corner
-ctx.drawImage( myImgElement, 475, 376, 12, 55, 0, 0, 12, 55);
-// top border
+drawSprite("topLeftCorner", 0, 0);
 for(let i = 0; i < totalColumns; i ++){
-	ctx.drawImage( myImgElement, 535, 376, 16, 55, (16*i + 12), 0, 16, 55);
+	drawSprite("topBorder", (16*i + 12), 0);
 }
 
-// top right corner
-ctx.drawImage( myImgElement, 743, 376, 8, 55, (16*totalColumns + 12), 0, 8, 55);
-// right border
+drawSprite("topRightCorner", (16*totalColumns + 12), 0);
 for(let i = 0; i < totalRows; i++){
-	ctx.drawImage( myImgElement, 743, 431, 8, 16, (16*totalColumns + 12), (16*i + 55), 8, 16);
+	drawSprite("rightBorder", (16*totalColumns + 12), (16*i + 55));
 }
 
-// bottom right corner
-ctx.drawImage( myImgElement, 743, 687, 8, 8, (16*totalColumns + 12), (16*totalRows + 55), 8, 8);
-// bottom border
+drawSprite("bottomRightCorner", (16*totalColumns + 12), (16*totalRows + 55))
 for(let i = 0; i < totalColumns; i++){
-	ctx.drawImage( myImgElement, 727, 687, 16, 8, ((16*totalColumns - 4) - 16 * i), (16*totalRows + 55), 16, 8);
+	drawSprite("bottomBorder", (16*totalColumns - 4 - 16 * i), (16*totalRows + 55));
 }
 
-// bottom left corner
-ctx.drawImage( myImgElement, 475, 687, 12, 8, 0, (16*totalRows + 55), 12, 8);
-// left border
+drawSprite("bottomLeftCorner", 0, (16*totalRows + 55));
 for(let i = 0; i < totalRows; i++){
-	ctx.drawImage( myImgElement, 475, 671, 12, 16, 0, ((16*totalRows + 39) - 16*i), 12, 16);
+	drawSprite("leftBorder", 0, (16*totalRows + 39 - 16*i));
 }
 
-// Mines counter background
-ctx.drawImage( myImgElement, 491, 391, 41, 25, 16, 15, 41, 25);
-
-// Time counter background
-ctx.drawImage( myImgElement, 491, 391, 41, 25, (16*(totalColumns - 3) + 13), 15, 41, 25);
-
-// Face
-ctx.drawImage( myImgElement, 602, 391, 26, 26, (8*totalColumns - 1), 15, 26, 26);
+drawSprite("numberBackground", 16, 15);
+drawSprite("numberBackground", (16*(totalColumns - 3) + 13), 15);
+drawSprite("faceBackground", (8*totalColumns - 1), 15);
 
 updateGrid();
 updateGuess();
@@ -157,10 +158,11 @@ updateTime(0);
 
 
 async function setup() {
-	await sleep(10);
+	await sleep(1);
 	setupSpriteMap();
 	setupCanvas("beginner");
-	changeFace("happy");
+	currentFace = "happy";
+	changeFace(currentFace);
 }
 
 setup();
@@ -329,8 +331,8 @@ canvasElem.addEventListener("mousedown", async e => {
 
 	// check for pixels boundaries for squares
 	if(11 <= x && x <= 16 * totalColumns + 11 && 55 <= y && y <= 16 * totalRows + 55) {
-
-		changeFace("suspense");
+		currentFace = "suspense";
+		changeFace(currentFace);
 		// right click
 		if(e.button === 2){
 			if (gameStatus === "notStarted" || gameStatus === "gameWon")
@@ -373,23 +375,25 @@ canvasElem.addEventListener("mouseup", async e => {
 
 	// face boundaries
 	if( leftBound <= x && x <= rightBound && topBound <= y && y <= bottomBound){
-		changeFace("happy");
 		resetGame();
 	}
-
 
 	if(gameStatus === "gameOver" || gameStatus === "gameWon"){
 		return;
 	}
 
-	if(x < 11 || 16 * totalColumns + 11 < x || y < 55 || 16 * totalRows + 55 < y)
+	if(x < 11 || 16 * totalColumns + 11 < x || y < 55 || 16 * totalRows + 55 < y) {
+		currentFace = "happy";
+		changeFace(currentFace);
 		return;
+	}
 
 	let row = Math.floor((y - 55)/16);
 	let col = Math.floor((x - 12)/16);
 
 
 	if(e.button === 0){
+		currentFace = "happy";
 
 		if( gameStatus === "notStarted"){
 			for(let i = 0; i < totalRows; i++){
@@ -413,7 +417,7 @@ canvasElem.addEventListener("mouseup", async e => {
 			if(gridValues[row][col] == 9){
 				gridValues[row][col] = 10;
 				gameStatus = "gameOver";
-				changeFace("dead");
+				currentFace = "dead";
 				showAllMines();
 				showWrongMines();
 			}
@@ -433,12 +437,13 @@ canvasElem.addEventListener("mouseup", async e => {
 		await sleep(1);
 		if(count === totalMines){
 			gameStatus = "gameWon";
-			changeFace("cool");
+			currentFace = "cool";
 			flagAllMines();
 			updateGuess();
 		}
 	}
 
+	changeFace(currentFace);
 	await sleep(100);
 	updateGrid();
 })
@@ -463,7 +468,7 @@ document.addEventListener('mousemove', e => {
 		if(8 * (totalColumns) - 1 <= x && x <= 8 * (totalColumns) + 25 && 15 <= y && y <= 41){
 			changeFace("clicked");
 		}else {
-			changeFace("happy");
+			changeFace(currentFace);
 		}
 
 		if(gameStatus === "gameOver" || gameStatus === "gameWon")
@@ -508,9 +513,9 @@ async function timer() {
 function updateTime(seconds){
 	let secStr = seconds.toString().padStart(3, "0");
 
-	drawSprite("red" + secStr[0], 16 * (totalColumns - 3) + 15, 17);
-	drawSprite("red" + secStr[1], 16 * (totalColumns - 3) + 28, 17);
-	drawSprite("red" + secStr[2], 16 * (totalColumns - 3) + 41, 17);
+	drawSprite("red" + secStr[0], 16*totalColumns - 33, 17);
+	drawSprite("red" + secStr[1], 16*totalColumns - 20, 17);
+	drawSprite("red" + secStr[2], 16*totalColumns -  7, 17);
 }
 
 function updateGuess(){
